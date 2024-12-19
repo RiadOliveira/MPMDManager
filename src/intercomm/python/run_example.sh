@@ -1,0 +1,1 @@
+PYTHONPATH=$(pwd) mpirun -n 2 python3 example/first.py : -n 2 python3 example/second.py : -n 2 python3 example/third.py
