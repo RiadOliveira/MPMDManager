@@ -1,8 +1,8 @@
 from mpi4py import MPI
 
 class ProgramData:
-  def __init__(self, name: str, initial_global_rank: int, comm: MPI.Comm, size: int):
-    self.__name, self.__initial_global_rank, self.__comm, self.__size = name, initial_global_rank, comm, size
+  def __init__(self, id_num: int, name: str, comm: MPI.Comm):
+    self.__id_num, self.__name, self.__comm, self.__size = id_num, name, comm, 1
 
   def free_comm(self):
     if self.comm != MPI.COMM_NULL: self.comm.Free()
@@ -10,10 +10,10 @@ class ProgramData:
   def __del__(self): self.free_comm()
 
   @property
-  def name(self): return self.__name
+  def id_num(self): return self.__id_num
 
   @property
-  def initial_global_rank(self): return self.__initial_global_rank
+  def name(self): return self.__name
 
   @property
   def comm(self): return self.__comm

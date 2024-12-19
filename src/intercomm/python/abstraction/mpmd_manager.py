@@ -1,42 +1,44 @@
 from mpi4py import MPI
-from sys import argv as program_args
 
 from .program_data import ProgramData
-from .filename_handler import get_filename_from_path
+from .filename_handler import get_filename
 
 class MPMDManager:
-  __local_data: ProgramData
-  __manager_comm = MPI.COMM_NULL
+  __local_comm: MPI.Comm
+  __manager_comm: MPI.Comm
   __programs_data: list[ProgramData] = []
 
   @staticmethod
   def initialize():
     MPMDManager.__manager_comm = MPI.COMM_WORLD.Dup()
-  
-    local_name = get_filename_from_path(program_args[0])
+
+    local_id = MPMDManager.__manager_comm.Get_attr(MPI.APPNUM)
+    MPMDManager.__set_local_comm(local_id)
+
+    local_rank = MPMDManager.__local_comm.Get_rank()
+    name_data = None if local_rank != 0 else get_filename()
+
     gathered_names = MPMDManager.__manager_comm.allgather(
-      local_name
+      name_data
     )
-
-    MPMDManager.__set_local_program_data(gathered_names, local_name)
-    MPMDManager.__fill_programs_data(gathered_names)
+    MPMDManager.__fill_programs_data(local_id, gathered_names)
 
   @staticmethod
-  def local_comm() -> MPI.Intracomm: return MPMDManager.__local_data.comm
+  def local_comm() -> MPI.Intracomm: return MPMDManager.__local_comm
   
   @staticmethod
-  def local_size(): return MPMDManager.__local_data.size
+  def local_size(): return MPMDManager.__local_comm.Get_size()
 
   @staticmethod
-  def comm_to(program_identifier: str | int):
+  def intercomm_to(identifier: str | int):
     return MPMDManager.__find_program_or_raise_exception(
-      program_identifier
+      identifier
     ).comm
 
   @staticmethod
-  def size_of(program_identifier: str | int):
+  def size_of(identifier: str | int):
     return MPMDManager.__find_program_or_raise_exception(
-      program_identifier
+      identifier
     ).size
 
   @staticmethod
@@ -48,66 +50,68 @@ class MPMDManager:
       MPMDManager.__manager_comm.Free()
 
   @staticmethod
-  def __set_local_program_data(gathered_names: list[str], local_name: str):
+  def __set_local_comm(local_id: int):
     global_rank = MPMDManager.__manager_comm.Get_rank()
 
-    ind = global_rank - 1
-    while ind >= 0 and gathered_names[ind] == local_name: ind -= 1
-    local_initial_rank = ind + 1
-
-    comm = MPMDManager.__manager_comm.Split(
-      local_initial_rank, global_rank
-    )
-    MPMDManager.__local_data = ProgramData(
-      local_name, local_initial_rank, comm, comm.Get_size()
+    MPMDManager.__local_comm = MPMDManager.__manager_comm.Split(
+      local_id, global_rank
     )
   
   @staticmethod
-  def __fill_programs_data(gathered_names: list[str | None]):
-    previous_name: str | None = None
-    local_data = MPMDManager.__local_data
+  def __fill_programs_data(local_id: int, gathered_names: list[str | None]):
+    current_program: ProgramData | None = None
+
     length = len(gathered_names)
-
-    rank = 0
+    rank, id_num = 0, -1
+    
     while rank < length:
-      is_local_program = rank == local_data.initial_global_rank
-      if is_local_program:
-        MPMDManager.__programs_data.append(local_data)
-        rank += local_data.size
-        continue
-
       name = gathered_names[rank]
-      if name == previous_name: MPMDManager.__programs_data[-1].increment_size()
+
+      if name == None: current_program.increment_size()
       else:
-        previous_name = name
-        intercomm = MPMDManager.__get_program_intercomm(rank)
-        MPMDManager.__programs_data.append(ProgramData(name, rank, intercomm, 1))
-      
+        id_num += 1
+        if id_num == local_id: rank += MPMDManager.local_size() - 1
+        else: current_program = MPMDManager.__add_program(id_num, name, rank)
+          
       rank += 1
 
   @staticmethod
-  def __get_program_intercomm(remote_initial_global_rank: int):
-    return MPMDManager.__local_data.comm.Create_intercomm(
-      0, MPMDManager.__manager_comm, remote_initial_global_rank, 0
+  def __add_program(id_num: int, name: str, initial_rank: int):
+    intercomm = MPMDManager.__get_program_intercomm(initial_rank)
+    current_program = ProgramData(id_num, name, intercomm)
+    MPMDManager.__programs_data.append(current_program)
+
+    return current_program
+
+  @staticmethod
+  def __get_program_intercomm(remote_program_initial_rank: int):
+    return MPMDManager.__local_comm.Create_intercomm(
+      0, MPMDManager.__manager_comm, remote_program_initial_rank, 0
     )
   
   @staticmethod
-  def __find_program_or_raise_exception(program_identifier: str | int):
-    invalid_identifier = not isinstance(program_identifier, (str, int))
-    if invalid_identifier: raise Exception("Invalid program identifier")
+  def __find_program_or_raise_exception(identifier: str | int):
+    invalid_identifier = not isinstance(identifier, (str, int))
+    if invalid_identifier: raise Exception("Invalid program identifier!")
 
-    program_found = MPMDManager.__find_program(program_identifier)
-    if program_found is None: raise Exception("Invalid program identifier")
+    program_found = MPMDManager.__find_program(identifier)
+    if program_found is None: raise Exception("Program not found!")
 
     return program_found
 
   @staticmethod
   def __find_program(identifier: str | int):
-    if isinstance(identifier, int):
-      invalid_index = identifier < 0 or identifier >= len(MPMDManager.__programs_data)
-      return None if invalid_index else MPMDManager.__programs_data[identifier]
-    
-    for data in MPMDManager.__programs_data: 
-      if identifier.startswith(data.name): return data
+    is_id_num = isinstance(identifier, int)
 
-    return None
+    if is_id_num: return MPMDManager.__find_program_by_id_num(identifier)
+    return MPMDManager.__find_program_by_name(identifier)
+  
+  @staticmethod
+  def __find_program_by_id_num(id_num: int):
+    for data in MPMDManager.__programs_data: 
+      if id_num == data.id_num: return data
+  
+  @staticmethod
+  def __find_program_by_name(name: str):
+    for data in MPMDManager.__programs_data: 
+      if name == data.name: return data

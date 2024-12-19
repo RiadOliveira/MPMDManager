@@ -1,3 +1,4 @@
+from sys import argv
 from ntpath import basename
 
-def get_filename_from_path(path: str): return basename(path)[:-3]
+def get_filename(): return basename(argv[0])[:-3]
