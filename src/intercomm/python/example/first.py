@@ -1,10 +1,10 @@
-from abstraction.mpmd_manager import MPMDManager
+from abstraction import MPMDManager
 
 MPMDManager.initialize()
 local_rank = MPMDManager.local_comm().Get_rank()
 
 if(local_rank == 0):
-  transfer_object = {'name': 'First(0) to Second(1)', 'value': 1021}
+  transfer_object = {'name': '0|First  to 1|Second', 'value': 1021}
   MPMDManager.intercomm_to('second').send(transfer_object, 1)
   
   print('(Send) 0|First  -> 1|Second: ', end='')
