@@ -1,10 +1,9 @@
 from abc import ABCMeta
-from mpi4py import MPI
 from .program_data import ProgramData
 
 class Manager(ABCMeta):
   @staticmethod
-  def comm_to_already_connected_program(
+  def comm_to_connected_program(
     program_identifier: str | int, programs_data: list[ProgramData]
   ):
     invalid_identifier = not isinstance(program_identifier, (str, int))

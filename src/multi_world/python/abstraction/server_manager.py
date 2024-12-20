@@ -1,8 +1,8 @@
 from mpi4py import MPI
+
 from .manager import Manager
-from sys import argv as program_args
 from .program_data import ProgramData
-from .filename_getter import get_filename_from_path
+from .filename_handler import get_filename
 
 class ServerManager:
   __port_name: str
@@ -58,7 +58,7 @@ class ServerManager:
   def __parse_name(received_name: str):
     if(received_name != ""): return received_name
 
-    program_name = get_filename_from_path(program_args[0])
+    program_name = get_filename()
     rank = MPI.COMM_WORLD.Get_rank()
     return program_name + str(rank)
   

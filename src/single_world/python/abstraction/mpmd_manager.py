@@ -4,6 +4,7 @@ from .program_data import ProgramData
 from .filename_handler import get_filename
 
 class MPMDManager:
+  __local_name: str
   __local_comm: MPI.Comm
   __manager_comm: MPI.Comm
   __programs_data: list[ProgramData] = []
@@ -22,6 +23,9 @@ class MPMDManager:
       name_data
     )
     MPMDManager.__fill_programs_data(local_id, gathered_names)
+
+  @staticmethod
+  def local_name(): return MPMDManager.__local_name
 
   @staticmethod
   def local_comm() -> MPI.Intracomm: return MPMDManager.__local_comm
@@ -70,7 +74,10 @@ class MPMDManager:
       if name == None: current_program.increment_size()
       else:
         id_num += 1
-        if id_num == local_id: rank += MPMDManager.local_size() - 1
+        
+        if id_num == local_id: 
+          MPMDManager.__local_name = name
+          rank += MPMDManager.local_size() - 1
         else: current_program = MPMDManager.__add_program(id_num, name, rank)
           
       rank += 1
