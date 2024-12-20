@@ -6,9 +6,10 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 if rank == 0:
+  ServerManager.initialize()
   ServerManager.open()
-  first_comm = ServerManager.accept()
 
+  first_comm = ServerManager.accept()
   transfer_object = {'name': '0|Third  to 1|First', 'value': 3011}
 
   # Send data to 1|First, mapped as rank 0 (dest=0) in first_comm, 
@@ -20,6 +21,8 @@ if rank == 0:
 
   ServerManager.finalize()
 elif rank == 1:
+  ClientManager.initialize()
+
   second_comm = ClientManager.request('second0')
   received_object = second_comm.recv(source=0)
   

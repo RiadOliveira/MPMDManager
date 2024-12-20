@@ -1,13 +1,15 @@
 from mpi4py import MPI
 
 class ProgramData:
-  def __init__(self, id_num: int, name: str, comm: MPI.Comm):
-    self.__id_num, self.__name, self.__comm, self.__size = id_num, name, comm, 1
+  __intercomm: MPI.Intercomm = MPI.COMM_NULL
 
-  def free_comm(self):
-    if self.comm != MPI.COMM_NULL: self.comm.Free()
+  def __init__(self, id_num: int, name: str, intercomm: MPI.Intercomm):
+    self.__id_num, self.__name, self.__intercomm, self.__size = id_num, name, intercomm, 1
 
-  def __del__(self): self.free_comm()
+  def disconnect_comm(self):
+    if self.__intercomm != MPI.COMM_NULL: self.__intercomm.Disconnect()
+
+  def __del__(self): self.disconnect_comm()
 
   @property
   def id_num(self): return self.__id_num
@@ -16,7 +18,7 @@ class ProgramData:
   def name(self): return self.__name
 
   @property
-  def comm(self): return self.__comm
+  def intercomm(self): return self.__intercomm
 
   @property
   def size(self): return self.__size

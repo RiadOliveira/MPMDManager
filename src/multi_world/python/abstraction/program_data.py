@@ -1,6 +1,8 @@
 from mpi4py import MPI
 
 class ProgramData:
+  __intercomm: MPI.Intercomm = MPI.COMM_NULL
+
   def __init__(self, identifier: str, intercomm: MPI.Intercomm):
     self.__identifier = identifier
     self.__intercomm = intercomm

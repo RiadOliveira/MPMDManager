@@ -4,9 +4,8 @@ from .program_data import ProgramData
 from .filename_handler import get_filename
 
 class MPMDManager:
-  __local_name: str
-  __local_comm: MPI.Comm
-  __manager_comm: MPI.Comm
+  __local_comm = MPI.COMM_NULL
+  __manager_comm = MPI.COMM_NULL
   __programs_data: list[ProgramData] = []
 
   @staticmethod
@@ -37,7 +36,7 @@ class MPMDManager:
   def intercomm_to(identifier: str | int):
     return MPMDManager.__find_program_or_raise_exception(
       identifier
-    ).comm
+    ).intercomm
 
   @staticmethod
   def size_of(identifier: str | int):
@@ -47,11 +46,13 @@ class MPMDManager:
 
   @staticmethod
   def finalize():
-    for program_data in MPMDManager.__programs_data: program_data.free_comm()
     MPMDManager.__programs_data.clear()
 
+    if MPMDManager.__local_comm != MPI.COMM_NULL:
+      MPMDManager.__local_comm.Disconnect()
+
     if MPMDManager.__manager_comm != MPI.COMM_NULL:
-      MPMDManager.__manager_comm.Free()
+      MPMDManager.__manager_comm.Disconnect()
 
   @staticmethod
   def __set_local_comm(local_id: int):
