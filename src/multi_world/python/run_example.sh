@@ -3,7 +3,7 @@
 # Get the directory of the current script
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-# Set PYTHONPATH to the src/client_server_split/python directory
+# Set PYTHONPATH to the src/multi_world/python directory
 export PYTHONPATH="$SCRIPT_DIR"
 
 # Start the intermediary server and create uri.txt
@@ -15,18 +15,18 @@ while [ ! -f "$SCRIPT_DIR/uri.txt" ]; do
   sleep 0.1
 done
 
-# Run the programs
-mpirun -n 2 --ompi-server file:"$SCRIPT_DIR/uri.txt" python3 "$SCRIPT_DIR/example/first.py" &
-PID_FIRST=$!
+# Python scripts to execute
+FILES=("first.py" "second.py" "third.py")
+PIDS=()
 
-mpirun -n 2 --ompi-server file:"$SCRIPT_DIR/uri.txt" python3 "$SCRIPT_DIR/example/second.py" &
-PID_SECOND=$!
-
-mpirun -n 2 --ompi-server file:"$SCRIPT_DIR/uri.txt" python3 "$SCRIPT_DIR/example/third.py" &
-PID_THIRD=$!
+# Run each program with mpirun
+for FILE in "${FILES[@]}"; do
+  mpirun -n 2 --ompi-server file:"$SCRIPT_DIR/uri.txt" python3 "$SCRIPT_DIR/example/$FILE" &
+  PIDS+=($!)
+done
 
 # Wait for all programs to finish
-wait $PID_FIRST $PID_SECOND $PID_THIRD
+wait "${PIDS[@]}"
 
 # Stop the ompi-server
 kill $OMPI_SERVER_PID
