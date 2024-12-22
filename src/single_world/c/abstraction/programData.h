@@ -1,8 +1,9 @@
-#include "mpi.h"
+#include <mpi.h>
+
+#include "filenameHandler.h"
 
 typedef struct {
-  int idNum;
-  int size;
-  char* name;
-  MPI_Comm* intercomm;
+  char name[FILENAME_MAX_SIZE];
+  uint size;
+  MPI_Comm* comm;
 } ProgramData;

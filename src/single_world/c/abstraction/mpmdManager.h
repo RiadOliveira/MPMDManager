@@ -1,23 +1,24 @@
 #ifndef MPMD_MANAGER
 #define MPMD_MANAGER
 
+#include <stdlib.h>
+
 #include "programData.h"
 
 typedef struct {
-  char* localName;
+  ProgramData* localData;
   ProgramData* programsData;
-  MPI_Comm* localComm;
-  MPI_Comm* managerComm;
+  MPI_Comm managerComm;
 } MPMDManager;
 
 typedef union {
   char* name;
-  int idNum;
+  int index;
 } ProgramIdentifier;
 
-typedef enum { NAME, ID_NUM } IdentifierType;
+typedef enum { NAME, INDEX } IdentifierType;
 
-MPMDManager Manager_Initialize();
+const MPMDManager* Manager_Init(char** argv);
 void Manager_Finalize(MPMDManager*);
 
 char* Manager_Name(MPMDManager*);
