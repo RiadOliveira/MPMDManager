@@ -5,6 +5,7 @@ typedef struct {
 } AuxiliarProgramData;
 
 void setProgramsData(MPMDManager*, const char*, uint);
+AuxiliarProgramData* getProgramsAuxiliarData(const char*, uint, uint*);
 void setLocalData(const char*, const char*);
 
 const MPMDManager* Manager_Init(char** argv) {
@@ -43,25 +44,38 @@ MPI_Comm* Manager_Size_of(
 ) {}
 
 void setProgramsData(
-  MPMDManager* manager, const char* gatheredNames, uint namesQuantity
+  MPMDManager* manager, const char* gatheredNames, uint worldSize
 ) {
   int worldRank;
   MPI_Comm_rank(manager->managerComm, &worldRank);
 
-  AuxiliarProgramData* leaders =
-    malloc(namesQuantity * sizeof(AuxiliarProgramData));
+  uint programsSize;
+  AuxiliarProgramData* auxiliarData =
+    getProgramsAuxiliarData(gatheredNames, worldSize, &programsSize);
+
+  free(auxiliarData);
+}
+
+AuxiliarProgramData* getProgramsAuxiliarData(
+  const char* gatheredNames, uint worldSize, uint* programsSize
+) {
+  *programsSize = -1;
+  AuxiliarProgramData* auxiliarData =
+    malloc(worldSize * sizeof(AuxiliarProgramData));
 
   const char* previousName = NULL;
   const char* currentName = gatheredNames;
-  // const char* localName = &gatheredNames[worldRank * NAME_MAX_SIZE];
 
-  uint ind = 0, programInd = 0, localInd;
-  leaders[0] = (AuxiliarProgramData){0, 1};
+  for(int ind = 0; ind < worldSize; ind++) {
+    if(streql(previousName, currentName)) auxiliarData[*programsSize].size++;
+    else auxiliarData[++(*programsSize)] = (AuxiliarProgramData){ind, 1};
 
-  while(ind++ < namesQuantity) {
+    previousName = currentName;
+    currentName += NAME_MAX_SIZE;
   }
 
-  free(leaders);
+  ++(*programsSize);
+  return auxiliarData;
 }
 
 void setLocalData(const char* localName, const char* gatheredNames) {}

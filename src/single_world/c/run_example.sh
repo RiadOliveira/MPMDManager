@@ -12,7 +12,7 @@ OUTPUT_DIR="$SCRIPT_DIR/example"
 
 # Compile the .c files
 for FILE in "${FILES[@]}"; do
-  mpicc -I"$INCLUDE_DIR" -o "$OUTPUT_DIR/$FILE.out" "$SCRIPT_DIR/abstraction/filenameHandler.c" "$SCRIPT_DIR/abstraction/mpmdManager.c" "$OUTPUT_DIR/$FILE.c"
+  mpicc -I"$INCLUDE_DIR" -o "$OUTPUT_DIR/$FILE.out" "$SCRIPT_DIR/abstraction/filenameHandler.c" "$SCRIPT_DIR/abstraction/utils.c" "$SCRIPT_DIR/abstraction/mpmdManager.c" "$OUTPUT_DIR/$FILE.c"
 done
 
 # Build the mpirun command
