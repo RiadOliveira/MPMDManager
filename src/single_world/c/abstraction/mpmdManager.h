@@ -2,6 +2,7 @@
 #define MPMD_MANAGER
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "programData.h"
 

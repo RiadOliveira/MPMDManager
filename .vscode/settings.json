@@ -2,6 +2,7 @@
   "files.associations": {
     "mpmdmanager.h": "c",
     "programdata.h": "c",
-    "filenamehandler.h": "c"
+    "filenamehandler.h": "c",
+    "shortcuttypes.h": "c"
   }
 }

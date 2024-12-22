@@ -81,7 +81,6 @@ class MPMDManager:
     intercomm = MPMDManager.__get_program_intercomm(initial_rank)
     MPMDManager.__programs_data.append(ProgramData(name, intercomm))
 
-  
   @staticmethod
   def __get_program_intercomm(remote_program_initial_rank: int):
     return MPMDManager.local_comm().Create_intercomm(
