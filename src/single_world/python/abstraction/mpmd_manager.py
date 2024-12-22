@@ -12,11 +12,10 @@ class MPMDManager:
   def initialize():
     MPMDManager.__manager_comm = MPI.COMM_WORLD.Dup()
 
-    local_name = get_filename()
     gathered_names = MPMDManager.__manager_comm.allgather(
-      local_name
+      get_filename()
     )
-    MPMDManager.__set_programs_data(local_name, gathered_names)
+    MPMDManager.__set_programs_data(gathered_names)
 
   @staticmethod
   def local_name(): return MPMDManager.__local_data.name
@@ -46,8 +45,10 @@ class MPMDManager:
     if manager_comm != MPI.COMM_NULL: manager_comm.Disconnect()
   
   @staticmethod
-  def __set_programs_data(local_name: str, gathered_names: list[str]):
-    MPMDManager.__set_local_data(local_name, gathered_names)
+  def __set_programs_data(gathered_names: list[str]):
+    global_rank = MPMDManager.__manager_comm.Get_rank()
+    local_name = gathered_names[global_rank]
+    MPMDManager.__set_local_data(global_rank, gathered_names)
 
     previous_name: str | None = None
     rank, length = 0, len(gathered_names)
@@ -67,12 +68,12 @@ class MPMDManager:
         else: MPMDManager.__add_program(name, rank - 1)          
 
   @staticmethod
-  def __set_local_data(local_name: str, gathered_names: list[str]):
-    global_rank = MPMDManager.__manager_comm.Get_rank()
+  def __set_local_data(global_rank: int, gathered_names: list[str]):
+    local_name = gathered_names[global_rank]
     local_id = gathered_names.index(local_name)
-
     local_comm = MPMDManager.__manager_comm.Split(local_id, global_rank)
     local_size = local_comm.Get_size()
+
     MPMDManager.__local_data = ProgramData(local_name, local_comm, local_size)
 
   @staticmethod
