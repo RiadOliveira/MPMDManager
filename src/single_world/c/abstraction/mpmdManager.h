@@ -8,24 +8,27 @@
 
 typedef struct {
   ProgramData* programsData;
-  uint localProgramInd;
+  uint programsQuantity, localProgramInd;
   MPI_Comm comm;
 } MPMDManager;
 
 typedef union {
-  char* name;
-  int index;
+  uint index;
+  const char* name;
 } ProgramIdentifier;
 
-typedef enum { NAME, INDEX } IdentifierType;
+typedef enum { INDEX, NAME } IdentifierType;
 
 const MPMDManager* Manager_Init(char** argv);
-void Manager_Finalize(MPMDManager*);
+void Manager_Finalize(const MPMDManager*);
 
-char* Manager_Name(MPMDManager*);
-int Manager_Size(MPMDManager*);
+const char* Manager_Local_Name(const MPMDManager*);
+uint Manager_Local_Size(const MPMDManager*);
+const MPI_Comm* Manager_Local_Comm(const MPMDManager*);
 
-MPI_Comm* Manager_Intercomm_to(MPMDManager*, ProgramIdentifier, IdentifierType);
-MPI_Comm* Manager_Size_of(MPMDManager*, ProgramIdentifier, IdentifierType);
+MPI_Comm* Manager_Intercomm_to(
+  const MPMDManager*, ProgramIdentifier, IdentifierType
+);
+uint Manager_Size_of(const MPMDManager*, ProgramIdentifier, IdentifierType);
 
 #endif

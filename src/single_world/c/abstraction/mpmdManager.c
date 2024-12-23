@@ -1,7 +1,5 @@
 #include "mpmdManager.h"
 
-#include <stdio.h>
-
 typedef struct {
   const char* name;
   uint leader, size;
@@ -9,7 +7,7 @@ typedef struct {
 
 typedef struct {
   AuxiliarProgramData* programs;
-  uint localProgramInd, size;
+  uint localProgramInd, quantity;
 } AuxiliarData;
 
 void setProgramsData(MPMDManager*, char**);
@@ -20,6 +18,14 @@ void getAuxiliarData(AuxiliarData*, const char*, uint, uint);
 void setLocalProgramData(MPMDManager*, AuxiliarData*, uint);
 void setRemoteProgramsData(MPMDManager*, AuxiliarData*);
 
+ProgramData* localProgram(const MPMDManager*);
+
+ProgramData* findProgramOrError(
+  const MPMDManager*, ProgramIdentifier, IdentifierType
+);
+ProgramData* findProgramByIndex(const MPMDManager*, uint);
+ProgramData* findProgramByName(const MPMDManager*, const char*);
+
 const MPMDManager* Manager_Init(char** argv) {
   MPMDManager* manager = malloc(sizeof(MPMDManager));
   MPI_Comm* managerComm = &manager->comm;
@@ -29,21 +35,47 @@ const MPMDManager* Manager_Init(char** argv) {
   return manager;
 }
 
-void Manager_Finalize(MPMDManager* manager) { free(manager); }
+void Manager_Finalize(const MPMDManager* manager) {
+  ProgramData* programs = manager->programsData;
+  const uint programsQuantity = manager->programsQuantity;
 
-char* Manager_Name(MPMDManager* manager) {}
+  for(uint ind = 0; ind < programsQuantity; ind++) {
+    MPI_Comm* programComm = &programs[ind].comm;
+    if(programComm != NULL) MPI_Comm_disconnect(programComm);
+  }
+  free(manager->programsData);
 
-int Manager_Size(MPMDManager* manager) {}
+  MPI_Comm* managerComm = (MPI_Comm*)&manager->comm;
+  if(managerComm != NULL) MPI_Comm_disconnect(managerComm);
+
+  free((MPMDManager*)manager);
+}
+
+const char* Manager_Local_Name(const MPMDManager* manager) {
+  return localProgram(manager)->name;
+}
+
+uint Manager_Local_Size(const MPMDManager* manager) {
+  return localProgram(manager)->size;
+}
+
+const MPI_Comm* Manager_Local_Comm(const MPMDManager* manager) {
+  return &localProgram(manager)->comm;
+}
 
 MPI_Comm* Manager_Intercomm_to(
-  MPMDManager* manager, ProgramIdentifier identifier,
+  const MPMDManager* manager, ProgramIdentifier identifier,
   IdentifierType identifierType
-) {}
+) {
+  return &findProgramOrError(manager, identifier, identifierType)->comm;
+}
 
-MPI_Comm* Manager_Size_of(
-  MPMDManager* manager, ProgramIdentifier identifier,
+uint Manager_Size_of(
+  const MPMDManager* manager, ProgramIdentifier identifier,
   IdentifierType identifierType
-) {}
+) {
+  return findProgramOrError(manager, identifier, identifierType)->size;
+}
 
 void setProgramsData(MPMDManager* manager, char** argv) {
   AuxiliarData auxiliar;
@@ -56,7 +88,9 @@ void setProgramsData(MPMDManager* manager, char** argv) {
   const char* gatheredNames = gatherNames(managerComm, argv, worldSize);
   getAuxiliarData(&auxiliar, gatheredNames, worldSize, worldRank);
 
-  manager->programsData = malloc(sizeof(ProgramData) * auxiliar.size);
+  manager->programsData = malloc(sizeof(ProgramData) * auxiliar.quantity);
+  manager->programsQuantity = auxiliar.quantity;
+
   setLocalProgramData(manager, &auxiliar, worldRank);
   setRemoteProgramsData(manager, &auxiliar);
 
@@ -98,7 +132,7 @@ void getAuxiliarData(
     previousName = currentName;
     currentName += NAME_MAX_SIZE;
   }
-  auxiliarData->size = programInd + 1;
+  auxiliarData->quantity = programInd + 1;
 }
 
 void setLocalProgramData(
@@ -116,10 +150,11 @@ void setLocalProgramData(
 }
 
 void setRemoteProgramsData(MPMDManager* manager, AuxiliarData* auxiliar) {
-  uint localProgramInd = auxiliar->localProgramInd;
+  const uint programsQuantity = auxiliar->quantity;
+  const uint localProgramInd = auxiliar->localProgramInd;
   ProgramData* localProgram = &manager->programsData[localProgramInd];
 
-  for(uint ind = 0; ind < auxiliar->size; ind++) {
+  for(uint ind = 0; ind < programsQuantity; ind++) {
     if(ind == localProgramInd) continue;
 
     ProgramData* currentProgram = &manager->programsData[ind];
@@ -133,4 +168,39 @@ void setRemoteProgramsData(MPMDManager* manager, AuxiliarData* auxiliar) {
       &currentProgram->comm
     );
   }
+}
+
+ProgramData* localProgram(const MPMDManager* manager) {
+  return &manager->programsData[manager->localProgramInd];
+}
+
+ProgramData* findProgramOrError(
+  const MPMDManager* manager, ProgramIdentifier identifier,
+  IdentifierType identifierType
+) {
+  ProgramData* programFound;
+  const bool indexId = identifierType == INDEX;
+
+  if(indexId) programFound = findProgramByIndex(manager, identifier.index);
+  else programFound = findProgramByName(manager, identifier.name);
+
+  if(programFound == NULL) MPI_Abort(manager->comm, EXIT_FAILURE);
+  return programFound;
+}
+
+ProgramData* findProgramByIndex(const MPMDManager* manager, uint index) {
+  if(index >= manager->programsQuantity) return NULL;
+  return &manager->programsData[index];
+}
+
+ProgramData* findProgramByName(const MPMDManager* manager, const char* name) {
+  ProgramData* programsData = manager->programsData;
+  const uint programsQuantity = manager->programsQuantity;
+
+  for(uint ind = 0; ind < programsQuantity; ind++) {
+    ProgramData* currentProgram = &programsData[ind];
+    if(streql(name, currentProgram->name)) return currentProgram;
+  }
+
+  return NULL;
 }
