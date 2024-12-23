@@ -7,9 +7,9 @@
 #include "utils.h"
 
 typedef struct {
-  ProgramData* localData;
   ProgramData* programsData;
-  MPI_Comm managerComm;
+  uint localProgramInd;
+  MPI_Comm comm;
 } MPMDManager;
 
 typedef union {

@@ -3,6 +3,11 @@
     "mpmdmanager.h": "c",
     "programdata.h": "c",
     "filenamehandler.h": "c",
-    "shortcuttypes.h": "c"
+    "shortcuttypes.h": "c",
+    "mpi.h": "c",
+    "array": "c",
+    "string": "c",
+    "string_view": "c",
+    "initializer_list": "c"
   }
 }

@@ -1,29 +1,31 @@
 #include "mpmdManager.h"
 
+#include <stdio.h>
+
 typedef struct {
+  const char* name;
   uint leader, size;
 } AuxiliarProgramData;
 
-void setProgramsData(MPMDManager*, const char*, uint);
-AuxiliarProgramData* getProgramsAuxiliarData(const char*, uint, uint*);
-void setLocalData(const char*, const char*);
+typedef struct {
+  AuxiliarProgramData* programs;
+  uint localProgramInd, size;
+} AuxiliarData;
+
+void setProgramsData(MPMDManager*, char**);
+
+const char* gatherNames(MPI_Comm*, char**, uint);
+void getAuxiliarData(AuxiliarData*, const char*, uint, uint);
+
+void setLocalProgramData(MPMDManager*, AuxiliarData*, uint);
+void setRemoteProgramsData(MPMDManager*, AuxiliarData*);
 
 const MPMDManager* Manager_Init(char** argv) {
   MPMDManager* manager = malloc(sizeof(MPMDManager));
-  MPI_Comm_dup(MPI_COMM_WORLD, &manager->managerComm);
+  MPI_Comm* managerComm = &manager->comm;
+  MPI_Comm_dup(MPI_COMM_WORLD, managerComm);
 
-  int worldSize, nameSize;
-  MPI_Comm_size(manager->managerComm, &worldSize);
-
-  char* gatheredNames = malloc(worldSize * NAME_MAX_SIZE * sizeof(char));
-  getFilename(gatheredNames, &nameSize, argv);
-  MPI_Allgather(
-    gatheredNames, nameSize, MPI_CHAR, gatheredNames, NAME_MAX_SIZE, MPI_CHAR,
-    manager->managerComm
-  );
-  setProgramsData(manager, gatheredNames, worldSize);
-
-  free(gatheredNames);
+  setProgramsData(manager, argv);
   return manager;
 }
 
@@ -43,39 +45,92 @@ MPI_Comm* Manager_Size_of(
   IdentifierType identifierType
 ) {}
 
-void setProgramsData(
-  MPMDManager* manager, const char* gatheredNames, uint worldSize
-) {
-  int worldRank;
-  MPI_Comm_rank(manager->managerComm, &worldRank);
+void setProgramsData(MPMDManager* manager, char** argv) {
+  AuxiliarData auxiliar;
+  int worldRank, worldSize;
+  MPI_Comm* managerComm = &manager->comm;
 
-  uint programsSize;
-  AuxiliarProgramData* auxiliarData =
-    getProgramsAuxiliarData(gatheredNames, worldSize, &programsSize);
+  MPI_Comm_rank(*managerComm, &worldRank);
+  MPI_Comm_size(*managerComm, &worldSize);
 
-  free(auxiliarData);
+  const char* gatheredNames = gatherNames(managerComm, argv, worldSize);
+  getAuxiliarData(&auxiliar, gatheredNames, worldSize, worldRank);
+
+  manager->programsData = malloc(sizeof(ProgramData) * auxiliar.size);
+  setLocalProgramData(manager, &auxiliar, worldRank);
+  setRemoteProgramsData(manager, &auxiliar);
+
+  free(auxiliar.programs);
+  free((char*)gatheredNames);
 }
 
-AuxiliarProgramData* getProgramsAuxiliarData(
-  const char* gatheredNames, uint worldSize, uint* programsSize
-) {
-  *programsSize = -1;
-  AuxiliarProgramData* auxiliarData =
-    malloc(worldSize * sizeof(AuxiliarProgramData));
+const char* gatherNames(MPI_Comm* managerComm, char** argv, uint worldSize) {
+  int nameSize;
+  char* gatheredNames = malloc(sizeof(char) * worldSize * NAME_MAX_SIZE);
 
+  getFilename(gatheredNames, &nameSize, argv);
+  MPI_Allgather(
+    gatheredNames, nameSize, MPI_CHAR, gatheredNames, NAME_MAX_SIZE, MPI_CHAR,
+    *managerComm
+  );
+
+  return gatheredNames;
+}
+
+void getAuxiliarData(
+  AuxiliarData* auxiliarData, const char* gatheredNames, uint worldSize,
+  uint worldRank
+) {
+  AuxiliarProgramData* data = malloc(sizeof(AuxiliarProgramData) * worldSize);
+  auxiliarData->programs = data;
+
+  int programInd = -1;
   const char* previousName = NULL;
   const char* currentName = gatheredNames;
 
   for(int ind = 0; ind < worldSize; ind++) {
-    if(streql(previousName, currentName)) auxiliarData[*programsSize].size++;
-    else auxiliarData[++(*programsSize)] = (AuxiliarProgramData){ind, 1};
+    if(streql(previousName, currentName)) data[programInd].size++;
+    else {
+      data[++programInd] = (AuxiliarProgramData){currentName, ind, 1};
+      if(ind <= worldRank) auxiliarData->localProgramInd = programInd;
+    }
 
     previousName = currentName;
     currentName += NAME_MAX_SIZE;
   }
-
-  ++(*programsSize);
-  return auxiliarData;
+  auxiliarData->size = programInd + 1;
 }
 
-void setLocalData(const char* localName, const char* gatheredNames) {}
+void setLocalProgramData(
+  MPMDManager* manager, AuxiliarData* auxiliar, uint worldRank
+) {
+  MPI_Comm* managerComm = &manager->comm;
+  uint localProgramInd = manager->localProgramInd = auxiliar->localProgramInd;
+
+  ProgramData* localProgram = &manager->programsData[localProgramInd];
+  AuxiliarProgramData* auxiliarLocal = &auxiliar->programs[localProgramInd];
+
+  strcpy(localProgram->name, auxiliarLocal->name);
+  localProgram->size = auxiliarLocal->size;
+  MPI_Comm_split(*managerComm, localProgramInd, worldRank, &localProgram->comm);
+}
+
+void setRemoteProgramsData(MPMDManager* manager, AuxiliarData* auxiliar) {
+  uint localProgramInd = auxiliar->localProgramInd;
+  ProgramData* localProgram = &manager->programsData[localProgramInd];
+
+  for(uint ind = 0; ind < auxiliar->size; ind++) {
+    if(ind == localProgramInd) continue;
+
+    ProgramData* currentProgram = &manager->programsData[ind];
+    AuxiliarProgramData* currentAuxiliar = &auxiliar->programs[ind];
+
+    strcpy(currentProgram->name, currentAuxiliar->name);
+    currentProgram->size = currentAuxiliar->size;
+
+    MPI_Intercomm_create(
+      localProgram->comm, 0, manager->comm, currentAuxiliar->leader, 0,
+      &currentProgram->comm
+    );
+  }
+}
