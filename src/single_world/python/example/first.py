@@ -1,7 +1,7 @@
 from abstraction import MPMDManager
 
 MPMDManager.init()
-local_rank = MPMDManager.local_comm().Get_rank()
+local_rank = MPMDManager.local_rank()
 
 if(local_rank == 0):
   transfer_object = {'text': '0|First  to 1|Second', 'value': 1021}
