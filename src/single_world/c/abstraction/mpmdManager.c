@@ -55,12 +55,20 @@ const char* Manager_Local_Name(const MPMDManager* manager) {
   return localProgram(manager)->name;
 }
 
-uint Manager_Local_Size(const MPMDManager* manager) {
-  return localProgram(manager)->size;
-}
-
 const MPI_Comm* Manager_Local_Comm(const MPMDManager* manager) {
   return &localProgram(manager)->comm;
+}
+
+int Manager_Local_Rank(const MPMDManager* manager) {
+  const MPI_Comm* localComm = Manager_Local_Comm(manager);
+  int rank;
+
+  MPI_Comm_rank(*localComm, &rank);
+  return rank;
+}
+
+uint Manager_Local_Size(const MPMDManager* manager) {
+  return localProgram(manager)->size;
 }
 
 const MPI_Comm* Manager_Intercomm_to(

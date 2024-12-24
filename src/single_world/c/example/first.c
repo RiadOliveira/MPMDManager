@@ -4,36 +4,27 @@
 int main(int argc, char** argv) {
   MPI_Init(&argc, &argv);
   const MPMDManager* manager = Manager_Init(argv);
+  int localRank = Manager_Local_Rank(manager);
 
-  int localRank;
-  const MPI_Comm* localComm = Manager_Local_Comm(manager);
-  MPI_Comm_rank(*localComm, &localRank);
+  char programName[10];
+  ProgramIdentifier nameId = {.name = programName};
 
   Message message;
   MPI_Datatype MessageType;
   getMessageType(&MessageType);
 
-  char programName[10];
-  ProgramIdentifier nameId = {.name = programName};
-
   if(localRank == 0) {
-    strcpy(message.text, "0|First  to 1|Second");
-    message.value = 1021;
-
     strcpy(programName, "second");
-    const MPI_Comm* secondIntercomm =
-      Manager_Intercomm_to(manager, nameId, NAME_ID);
+    const MPI_Comm* secondComm = Manager_Intercomm_to(manager, nameId, NAME_ID);
 
-    MPI_Send(&message, 1, MessageType, 1, 0, *secondIntercomm);
+    fillMessage(&message, "0|First  to 1|Second", 1021);
+    MPI_Send(&message, 1, MessageType, 1, 0, *secondComm);
     printMessage("(Send) 0|First  -> 1|Second:", &message);
   } else if(localRank == 1) {
     strcpy(programName, "third");
-    const MPI_Comm* thirdIntercomm =
-      Manager_Intercomm_to(manager, nameId, NAME_ID);
+    const MPI_Comm* thirdComm = Manager_Intercomm_to(manager, nameId, NAME_ID);
 
-    MPI_Recv(
-      &message, 1, MessageType, 0, 0, *thirdIntercomm, MPI_STATUS_IGNORE
-    );
+    MPI_Recv(&message, 1, MessageType, 0, 0, *thirdComm, MPI_STATUS_IGNORE);
     printMessage("(Recv) 1|First  <- 0|Third: ", &message);
   }
 

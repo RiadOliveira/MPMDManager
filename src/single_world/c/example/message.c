@@ -18,6 +18,11 @@ void getMessageType(MPI_Datatype* MessageType) {
   MPI_Type_commit(MessageType);
 }
 
+void fillMessage(Message* message, char* text, int value) {
+  strcpy(message->text, text);
+  message->value = value;
+}
+
 void printMessage(const char* prefix, Message* message) {
   printf("%s {text: '%s', value: %d}\n", prefix, message->text, message->value);
 }
