@@ -63,7 +63,7 @@ const MPI_Comm* Manager_Local_Comm(const MPMDManager* manager) {
   return &localProgram(manager)->comm;
 }
 
-MPI_Comm* Manager_Intercomm_to(
+const MPI_Comm* Manager_Intercomm_to(
   const MPMDManager* manager, ProgramIdentifier identifier,
   IdentifierType identifierType
 ) {
@@ -179,7 +179,7 @@ ProgramData* findProgramOrError(
   IdentifierType identifierType
 ) {
   ProgramData* programFound;
-  const bool indexId = identifierType == INDEX;
+  const bool indexId = identifierType == INDEX_ID;
 
   if(indexId) programFound = findProgramByIndex(manager, identifier.index);
   else programFound = findProgramByName(manager, identifier.name);
