@@ -11,6 +11,8 @@
     "initializer_list": "c",
     "stdlib.h": "c",
     "type_traits": "c",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "managerauxiliar.h": "c",
+    "libmpmdmanager.h": "c"
   }
 }

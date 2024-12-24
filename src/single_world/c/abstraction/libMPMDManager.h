@@ -1,10 +1,9 @@
-#ifndef MPMD_MANAGER
-#define MPMD_MANAGER
+#ifndef LIB_MPMD_MANAGER
+#define LIB_MPMD_MANAGER
 
 #include <stdlib.h>
 
 #include "programData.h"
-#include "utils.h"
 
 typedef struct {
   ProgramData* programsData;
