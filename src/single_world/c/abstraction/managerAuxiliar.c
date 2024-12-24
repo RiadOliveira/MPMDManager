@@ -9,7 +9,7 @@ void setProgramsData(MPMDManager* manager, char** argv) {
   MPI_Comm_size(*managerComm, &worldSize);
 
   const char* gatheredNames = gatherNames(managerComm, argv, worldSize);
-  getAuxiliarData(&auxiliar, gatheredNames, worldSize, worldRank);
+  getAuxiliarData(&auxiliar, gatheredNames, worldRank, worldSize);
 
   manager->programsData = malloc(sizeof(ProgramData) * auxiliar.quantity);
   manager->programsQuantity = auxiliar.quantity;
@@ -35,8 +35,8 @@ const char* gatherNames(MPI_Comm* managerComm, char** argv, uint worldSize) {
 }
 
 void getAuxiliarData(
-  AuxiliarData* auxiliarData, const char* gatheredNames, uint worldSize,
-  uint worldRank
+  AuxiliarData* auxiliarData, const char* gatheredNames, uint worldRank,
+  uint worldSize
 ) {
   AuxiliarProgramData* data = malloc(sizeof(AuxiliarProgramData) * worldSize);
   auxiliarData->programs = data;
@@ -75,7 +75,7 @@ void setLocalProgramData(
 void setRemoteProgramsData(MPMDManager* manager, AuxiliarData* auxiliar) {
   const uint programsQuantity = auxiliar->quantity;
   const uint localProgramInd = auxiliar->localProgramInd;
-  ProgramData* localProgram = &manager->programsData[localProgramInd];
+  MPI_Comm* localComm = &manager->programsData[localProgramInd].comm;
 
   for(uint ind = 0; ind < programsQuantity; ind++) {
     if(ind == localProgramInd) continue;
@@ -87,7 +87,7 @@ void setRemoteProgramsData(MPMDManager* manager, AuxiliarData* auxiliar) {
     currentProgram->size = currentAuxiliar->size;
 
     MPI_Intercomm_create(
-      localProgram->comm, 0, manager->comm, currentAuxiliar->leader, 0,
+      *localComm, 0, manager->comm, currentAuxiliar->leader, 0,
       &currentProgram->comm
     );
   }
