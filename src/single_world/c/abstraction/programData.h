@@ -4,7 +4,7 @@
 
 typedef union {
   uint index;
-  const char* name;
+  char* name;
 } ProgramIdentifier;
 
 typedef enum { INDEX_ID, NAME_ID } IdentifierType;

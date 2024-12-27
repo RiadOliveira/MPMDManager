@@ -1,0 +1,4 @@
+#ifndef LIB_CLIENT_MANAGER
+#define LIB_CLIENT_MANAGER
+
+#endif

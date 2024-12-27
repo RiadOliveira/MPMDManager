@@ -7,14 +7,15 @@
 
 typedef union {
   uint index;
-  const char* name;
+  char* name;
 } ProgramIdentifier;
 
 typedef enum { INDEX_ID, NAME_ID } IdentifierType;
 
 typedef struct {
+  bool active;
   ProgramIdentifier identifier;
-  IdentifierType IdentifierType;
+  IdentifierType identifierType;
   MPI_Comm comm;
 } ProgramData;
 
