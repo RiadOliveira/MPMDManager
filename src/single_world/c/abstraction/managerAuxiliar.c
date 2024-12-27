@@ -35,11 +35,11 @@ const char* gatherNames(MPI_Comm* managerComm, char** argv, uint worldSize) {
 }
 
 void getAuxiliarData(
-  AuxiliarData* auxiliarData, const char* gatheredNames, uint worldRank,
+  AuxiliarData* auxiliar, const char* gatheredNames, uint worldRank,
   uint worldSize
 ) {
   AuxiliarProgramData* data = malloc(sizeof(AuxiliarProgramData) * worldSize);
-  auxiliarData->programs = data;
+  auxiliar->programs = data;
 
   int programInd = -1;
   const char* previousName = NULL;
@@ -49,13 +49,13 @@ void getAuxiliarData(
     if(streql(previousName, currentName)) data[programInd].size++;
     else {
       data[++programInd] = (AuxiliarProgramData){currentName, ind, 1};
-      if(ind <= worldRank) auxiliarData->localProgramInd = programInd;
+      if(ind <= worldRank) auxiliar->localProgramInd = programInd;
     }
 
     previousName = currentName;
     currentName += NAME_MAX_SIZE;
   }
-  auxiliarData->quantity = programInd + 1;
+  auxiliar->quantity = programInd + 1;
 }
 
 void setLocalProgramData(

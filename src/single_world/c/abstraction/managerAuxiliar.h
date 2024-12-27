@@ -12,20 +12,26 @@ typedef struct {
   uint localProgramInd, quantity;
 } AuxiliarData;
 
-void setProgramsData(MPMDManager*, char**);
+void setProgramsData(MPMDManager* manager, char** argv);
 
-const char* gatherNames(MPI_Comm*, char**, uint);
-void getAuxiliarData(AuxiliarData*, const char*, uint, uint);
+const char* gatherNames(MPI_Comm* managerComm, char** argv, uint worldSize);
+void getAuxiliarData(
+  AuxiliarData* auxiliar, const char* gatheredNames, uint worldRank,
+  uint worldSize
+);
 
-void setLocalProgramData(MPMDManager*, AuxiliarData*, uint);
-void setRemoteProgramsData(MPMDManager*, AuxiliarData*);
+void setLocalProgramData(
+  MPMDManager* manager, AuxiliarData* auxiliar, uint worldRank
+);
+void setRemoteProgramsData(MPMDManager* manager, AuxiliarData* auxiliar);
 
-ProgramData* localProgram(const MPMDManager*);
+ProgramData* localProgram(const MPMDManager* manager);
 
 ProgramData* findProgramOrError(
-  const MPMDManager*, ProgramIdentifier, IdentifierType
+  const MPMDManager* manager, ProgramIdentifier identifier,
+  IdentifierType identifierType
 );
-ProgramData* findProgramByIndex(const MPMDManager*, uint);
-ProgramData* findProgramByName(const MPMDManager*, const char*);
+ProgramData* findProgramByIndex(const MPMDManager* manager, uint index);
+ProgramData* findProgramByName(const MPMDManager* manager, const char* name);
 
 bool streql(const char* first, const char* second);
