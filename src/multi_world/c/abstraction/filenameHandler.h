@@ -1,5 +1,5 @@
-#ifndef FILE_HANDLER
-#define FILE_HANDLER
+#ifndef FILENAME_HANDLER
+#define FILENAME_HANDLER
 
 #include "shortcutTypes.h"
 
