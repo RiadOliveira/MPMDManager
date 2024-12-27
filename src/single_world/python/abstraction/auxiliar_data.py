@@ -1,4 +1,4 @@
-class AuxiliarProgramData:
+class AuxiliarConnection:
   name: str
   leader: int
   size: int

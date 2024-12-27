@@ -5,22 +5,22 @@ void initConnections(ConnectionsData* data, uint maxSize) {
 
   data->size = 0;
   data->maxSize = parsedMax;
-  data->connections = malloc(sizeof(ProgramData) * parsedMax);
+  data->connections = malloc(sizeof(Connection) * parsedMax);
 
-  ProgramData* connections = data->connections;
+  Connection* connections = data->connections;
   for(uint ind = 0; ind < parsedMax; ind++) {
     connections[ind].active = false;
   }
 }
 
 void finalizeConnections(ConnectionsData* data) {
-  ProgramData* connections = data->connections;
+  Connection* connections = data->connections;
   const uint maxSize = data->maxSize;
 
   for(uint ind = 0; ind < maxSize; ind++) {
-    MPI_Comm* programComm = &connections[ind].comm;
-    if(programComm != NULL) MPI_Comm_disconnect(programComm);
+    MPI_Comm* connectionComm = &connections[ind].comm;
+    if(connectionComm != NULL) MPI_Comm_disconnect(connectionComm);
   }
 }
 
-void addConnection(ConnectionsData* data, ProgramData* connection) {}
+void addConnection(ConnectionsData* data, Connection* connection) {}

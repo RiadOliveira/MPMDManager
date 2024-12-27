@@ -6,7 +6,7 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 if rank == 0:
-  ServerManager.initialize()
+  ServerManager.init()
   ServerManager.open()
 
   first_comm = ServerManager.accept()
@@ -21,7 +21,7 @@ if rank == 0:
 
   ServerManager.finalize()
 elif rank == 1:
-  ClientManager.initialize()
+  ClientManager.init()
 
   second_comm = ClientManager.request('second0')
   received_object = second_comm.recv(source=0)

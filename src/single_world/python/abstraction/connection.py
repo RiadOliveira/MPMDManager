@@ -1,6 +1,6 @@
 from mpi4py import MPI
 
-class ProgramData:
+class Connection:
   def __init__(self, name: str, size: int, comm: MPI.Comm):
     self.__name, self.__size, self.__comm = name, size, comm
 

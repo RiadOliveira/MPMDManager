@@ -2,40 +2,39 @@ from mpi4py import MPI
 from time import sleep
 
 from .manager import Manager
-from .program_data import ProgramData
+from .connection import Connection
 from .request_attempts_data import RequestAttemptsData
 
 class ClientManager:
-  __manager_comm: MPI.Intracomm = MPI.COMM_NULL
-  __servers_data: list[ProgramData] = []
+  __comm = MPI.COMM_NULL
+  __servers: list[Connection] = []
 
   @staticmethod
-  def initialize(): ClientManager.__manager_comm = MPI.COMM_SELF.Dup()
+  def init(): ClientManager.__comm = MPI.COMM_SELF.Dup()
 
   @staticmethod
   def request(server_name: str, attempts_data = RequestAttemptsData()):
     port_name = ClientManager.__try_to_connect(server_name, attempts_data)
-    server_intercomm = ClientManager.__manager_comm.Connect(port_name)
+    server_intercomm = ClientManager.__comm.Connect(port_name)
 
-    server_data = ProgramData(server_name, server_intercomm)
-    ClientManager.__servers_data.append(server_data)
+    server_data = Connection(server_name, server_intercomm)
+    ClientManager.__servers.append(server_data)
     return server_intercomm
 
   @staticmethod
-  def intercomm_to_connected_server(server_identifier: str | int):
-    return Manager.intercomm_to_connected_program(
-      server_identifier, ClientManager.__servers_data
+  def retrieve_server_comm(server_id: str | int):
+    return Manager.retrieve_connection_comm(
+      server_id, ClientManager.__servers
     )
   
   @staticmethod
-  def disconnect_servers(): ClientManager.__servers_data.clear()
+  def disconnect_servers(): ClientManager.__servers.clear()
 
   @staticmethod
   def finalize(): 
     ClientManager.disconnect_servers()
 
-    if ClientManager.__manager_comm != MPI.COMM_NULL:
-      ClientManager.__manager_comm.Disconnect()
+    if ClientManager.__comm != MPI.COMM_NULL: ClientManager.__comm.Disconnect()
 
   @staticmethod
   def __try_to_connect(

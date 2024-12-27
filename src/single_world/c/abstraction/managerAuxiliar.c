@@ -1,6 +1,6 @@
 #include "managerAuxiliar.h"
 
-void setProgramsData(MPMDManager* manager, char** argv) {
+void setConnections(MPMDManager* manager, char** argv) {
   AuxiliarData auxiliar;
   int worldRank, worldSize;
   MPI_Comm* managerComm = &manager->comm;
@@ -11,13 +11,13 @@ void setProgramsData(MPMDManager* manager, char** argv) {
   const char* gatheredNames = gatherNames(managerComm, argv, worldSize);
   getAuxiliarData(&auxiliar, gatheredNames, worldRank, worldSize);
 
-  manager->programsData = malloc(sizeof(ProgramData) * auxiliar.quantity);
-  manager->programsQuantity = auxiliar.quantity;
+  manager->connections = malloc(sizeof(Connection) * auxiliar.size);
+  manager->connectionsSize = auxiliar.size;
 
-  setLocalProgramData(manager, &auxiliar, worldRank);
-  setRemoteProgramsData(manager, &auxiliar);
+  setLocalConnection(manager, &auxiliar, worldRank);
+  setRemoteConnections(manager, &auxiliar);
 
-  free(auxiliar.programs);
+  free(auxiliar.connections);
   free((char*)gatheredNames);
 }
 
@@ -38,91 +38,90 @@ void getAuxiliarData(
   AuxiliarData* auxiliar, const char* gatheredNames, uint worldRank,
   uint worldSize
 ) {
-  AuxiliarProgramData* data = malloc(sizeof(AuxiliarProgramData) * worldSize);
-  auxiliar->programs = data;
+  AuxiliarConnection* data = malloc(sizeof(AuxiliarConnection) * worldSize);
+  auxiliar->connections = data;
 
-  int programInd = -1;
+  int connectionInd = -1;
   const char* previousName = NULL;
   const char* currentName = gatheredNames;
 
   for(int ind = 0; ind < worldSize; ind++) {
-    if(streql(previousName, currentName)) data[programInd].size++;
+    if(streql(previousName, currentName)) data[connectionInd].size++;
     else {
-      data[++programInd] = (AuxiliarProgramData){currentName, ind, 1};
-      if(ind <= worldRank) auxiliar->localProgramInd = programInd;
+      data[++connectionInd] = (AuxiliarConnection){currentName, ind, 1};
+      if(ind <= worldRank) auxiliar->localInd = connectionInd;
     }
 
     previousName = currentName;
     currentName += NAME_MAX_SIZE;
   }
-  auxiliar->quantity = programInd + 1;
+  auxiliar->size = connectionInd + 1;
 }
 
-void setLocalProgramData(
+void setLocalConnection(
   MPMDManager* manager, AuxiliarData* auxiliar, uint worldRank
 ) {
   MPI_Comm* managerComm = &manager->comm;
-  uint localProgramInd = manager->localProgramInd = auxiliar->localProgramInd;
+  uint localInd = manager->localInd = auxiliar->localInd;
 
-  ProgramData* localProgram = &manager->programsData[localProgramInd];
-  AuxiliarProgramData* auxiliarLocal = &auxiliar->programs[localProgramInd];
+  Connection* localConnection = &manager->connections[localInd];
+  AuxiliarConnection* auxiliarLocal = &auxiliar->connections[localInd];
 
-  strcpy(localProgram->name, auxiliarLocal->name);
-  localProgram->size = auxiliarLocal->size;
-  MPI_Comm_split(*managerComm, localProgramInd, worldRank, &localProgram->comm);
+  strcpy(localConnection->name, auxiliarLocal->name);
+  localConnection->size = auxiliarLocal->size;
+  MPI_Comm_split(*managerComm, localInd, worldRank, &localConnection->comm);
 }
 
-void setRemoteProgramsData(MPMDManager* manager, AuxiliarData* auxiliar) {
-  const uint programsQuantity = auxiliar->quantity;
-  const uint localProgramInd = auxiliar->localProgramInd;
-  MPI_Comm* localComm = &manager->programsData[localProgramInd].comm;
+void setRemoteConnections(MPMDManager* manager, AuxiliarData* auxiliar) {
+  const uint connectionsSize = auxiliar->size;
+  const uint localInd = auxiliar->localInd;
+  MPI_Comm* localComm = &manager->connections[localInd].comm;
 
-  for(uint ind = 0; ind < programsQuantity; ind++) {
-    if(ind == localProgramInd) continue;
+  for(uint ind = 0; ind < connectionsSize; ind++) {
+    if(ind == localInd) continue;
 
-    ProgramData* currentProgram = &manager->programsData[ind];
-    AuxiliarProgramData* currentAuxiliar = &auxiliar->programs[ind];
+    Connection* currentConnection = &manager->connections[ind];
+    AuxiliarConnection* currentAuxiliar = &auxiliar->connections[ind];
 
-    strcpy(currentProgram->name, currentAuxiliar->name);
-    currentProgram->size = currentAuxiliar->size;
+    strcpy(currentConnection->name, currentAuxiliar->name);
+    currentConnection->size = currentAuxiliar->size;
 
     MPI_Intercomm_create(
       *localComm, 0, manager->comm, currentAuxiliar->leader, 0,
-      &currentProgram->comm
+      &currentConnection->comm
     );
   }
 }
 
-ProgramData* localProgram(const MPMDManager* manager) {
-  return &manager->programsData[manager->localProgramInd];
+Connection* localConnection(const MPMDManager* manager) {
+  return &manager->connections[manager->localInd];
 }
 
-ProgramData* findProgramOrError(
-  const MPMDManager* manager, ProgramIdentifier identifier,
-  IdentifierType identifierType
+Connection* findConnectionOrError(
+  const MPMDManager* manager, ConnectionId id, IdType idType
 ) {
-  ProgramData* programFound;
-  const bool indexId = identifierType == INDEX_ID;
+  Connection* connectionFound;
+  const bool indexId = idType == INDEX_ID;
 
-  if(indexId) programFound = findProgramByIndex(manager, identifier.index);
-  else programFound = findProgramByName(manager, identifier.name);
+  if(indexId) connectionFound = findConnectionByIndex(manager, id.index);
+  else connectionFound = findConnectionByName(manager, id.name);
 
-  if(programFound == NULL) MPI_Abort(manager->comm, EXIT_FAILURE);
-  return programFound;
+  if(connectionFound == NULL) MPI_Abort(manager->comm, EXIT_FAILURE);
+  return connectionFound;
 }
 
-ProgramData* findProgramByIndex(const MPMDManager* manager, uint index) {
-  if(index >= manager->programsQuantity) return NULL;
-  return &manager->programsData[index];
+Connection* findConnectionByIndex(const MPMDManager* manager, uint index) {
+  if(index >= manager->connectionsSize) return NULL;
+  return &manager->connections[index];
 }
 
-ProgramData* findProgramByName(const MPMDManager* manager, const char* name) {
-  ProgramData* programsData = manager->programsData;
-  const uint programsQuantity = manager->programsQuantity;
+Connection* findConnectionByName(const MPMDManager* manager, const char* name) {
+  Connection* connections = manager->connections;
+  const uint connectionsSize = manager->connectionsSize;
 
-  for(uint ind = 0; ind < programsQuantity; ind++) {
-    ProgramData* currentProgram = &programsData[ind];
-    if(streql(name, currentProgram->name)) return currentProgram;
+  for(uint ind = 0; ind < connectionsSize; ind++) {
+    Connection* currentConnection = &connections[ind];
+    if(streql(name, currentConnection->name)) return currentConnection;
   }
 
   return NULL;

@@ -43,13 +43,10 @@ void Server_Close(const ServerManager* manager) {
 }
 
 void Server_Accept(
-  const ServerManager* manager, ProgramIdentifier identifier,
-  IdentifierType identifierType
+  const ServerManager* manager, ConnectionId id, IdType idType
 ) {}
 
-void Server_Comm_to_Connected_Client(
-  ProgramIdentifier identifier, IdentifierType IdentifierType
-) {}
+void Server_Comm_to_Connected_Client(ConnectionId id, IdType idType) {}
 
 const char* Server_Name(const ServerManager* manager) { return manager->name; }
 

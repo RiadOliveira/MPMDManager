@@ -3,10 +3,10 @@
 
 #define DEFAULT_MAX_CONNECTIONS 5
 
-#include "programData.h"
+#include "connection.h"
 
 typedef struct {
-  ProgramData* connections;
+  Connection* connections;
   uint size, maxSize;
 } ConnectionsData;
 

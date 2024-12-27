@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "typeinfo": "c",
+    "array": "c",
+    "string_view": "c",
+    "initializer_list": "c"
+  }
+}

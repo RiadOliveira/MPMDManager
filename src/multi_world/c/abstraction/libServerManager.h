@@ -23,10 +23,10 @@ void Server_Disconnect_Clients(const ServerManager* manager);
 void Server_Open(const ServerManager* manager);
 void Server_Close(const ServerManager* manager);
 
-void Server_Accept(const ServerManager* manager);
-void Server_Comm_to_Connected_Client(
-  ProgramIdentifier identifier, IdentifierType IdentifierType
+void Server_Accept(
+  const ServerManager* manager, ConnectionId id, IdType idType
 );
+void Server_Comm_to_Connected_Client(ConnectionId id, IdType idType);
 
 const char* Server_Name(const ServerManager* manager);
 

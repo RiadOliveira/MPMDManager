@@ -5,19 +5,19 @@ const MPMDManager* Manager_Init(char** argv) {
   MPI_Comm* managerComm = &manager->comm;
   MPI_Comm_dup(MPI_COMM_WORLD, managerComm);
 
-  setProgramsData(manager, argv);
+  setConnections(manager, argv);
   return manager;
 }
 
 void Manager_Finalize(const MPMDManager* manager) {
-  ProgramData* programs = manager->programsData;
-  const uint programsQuantity = manager->programsQuantity;
+  Connection* connections = manager->connections;
+  const uint connectionsSize = manager->connectionsSize;
 
-  for(uint ind = 0; ind < programsQuantity; ind++) {
-    MPI_Comm* programComm = &programs[ind].comm;
-    if(programComm != NULL) MPI_Comm_disconnect(programComm);
+  for(uint ind = 0; ind < connectionsSize; ind++) {
+    MPI_Comm* connectionComm = &connections[ind].comm;
+    if(connectionComm != NULL) MPI_Comm_disconnect(connectionComm);
   }
-  free(manager->programsData);
+  free(manager->connections);
 
   MPI_Comm* managerComm = (MPI_Comm*)&manager->comm;
   if(managerComm != NULL) MPI_Comm_disconnect(managerComm);
@@ -26,11 +26,11 @@ void Manager_Finalize(const MPMDManager* manager) {
 }
 
 const char* Manager_Local_Name(const MPMDManager* manager) {
-  return localProgram(manager)->name;
+  return localConnection(manager)->name;
 }
 
 const MPI_Comm* Manager_Local_Comm(const MPMDManager* manager) {
-  return &localProgram(manager)->comm;
+  return &localConnection(manager)->comm;
 }
 
 int Manager_Local_Rank(const MPMDManager* manager) {
@@ -42,19 +42,17 @@ int Manager_Local_Rank(const MPMDManager* manager) {
 }
 
 uint Manager_Local_Size(const MPMDManager* manager) {
-  return localProgram(manager)->size;
+  return localConnection(manager)->size;
 }
 
-const MPI_Comm* Manager_Intercomm_to(
-  const MPMDManager* manager, ProgramIdentifier identifier,
-  IdentifierType identifierType
+const MPI_Comm* Manager_Comm_to(
+  const MPMDManager* manager, ConnectionId id, IdType idType
 ) {
-  return &findProgramOrError(manager, identifier, identifierType)->comm;
+  return &findConnectionOrError(manager, id, idType)->comm;
 }
 
 uint Manager_Size_of(
-  const MPMDManager* manager, ProgramIdentifier identifier,
-  IdentifierType identifierType
+  const MPMDManager* manager, ConnectionId id, IdType idType
 ) {
-  return findProgramOrError(manager, identifier, identifierType)->size;
+  return findConnectionOrError(manager, id, idType)->size;
 }

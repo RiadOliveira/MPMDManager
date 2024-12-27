@@ -1,3 +1,6 @@
+#ifndef MANAGER_AUXILIAR
+#define MANAGER_AUXILIAR
+
 #include <string.h>
 
 #include "libMPMDManager.h"
@@ -5,14 +8,14 @@
 typedef struct {
   const char* name;
   uint leader, size;
-} AuxiliarProgramData;
+} AuxiliarConnection;
 
 typedef struct {
-  AuxiliarProgramData* programs;
-  uint localProgramInd, quantity;
+  AuxiliarConnection* connections;
+  uint localInd, size;
 } AuxiliarData;
 
-void setProgramsData(MPMDManager* manager, char** argv);
+void setConnections(MPMDManager* manager, char** argv);
 
 const char* gatherNames(MPI_Comm* managerComm, char** argv, uint worldSize);
 void getAuxiliarData(
@@ -20,18 +23,19 @@ void getAuxiliarData(
   uint worldSize
 );
 
-void setLocalProgramData(
+void setLocalConnection(
   MPMDManager* manager, AuxiliarData* auxiliar, uint worldRank
 );
-void setRemoteProgramsData(MPMDManager* manager, AuxiliarData* auxiliar);
+void setRemoteConnections(MPMDManager* manager, AuxiliarData* auxiliar);
 
-ProgramData* localProgram(const MPMDManager* manager);
+Connection* localConnection(const MPMDManager* manager);
 
-ProgramData* findProgramOrError(
-  const MPMDManager* manager, ProgramIdentifier identifier,
-  IdentifierType identifierType
+Connection* findConnectionOrError(
+  const MPMDManager* manager, ConnectionId id, IdType idType
 );
-ProgramData* findProgramByIndex(const MPMDManager* manager, uint index);
-ProgramData* findProgramByName(const MPMDManager* manager, const char* name);
+Connection* findConnectionByIndex(const MPMDManager* manager, uint index);
+Connection* findConnectionByName(const MPMDManager* manager, const char* name);
 
 bool streql(const char* first, const char* second);
+
+#endif
