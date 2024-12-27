@@ -11,13 +11,6 @@ typedef struct {
   MPI_Comm comm;
 } MPMDManager;
 
-typedef union {
-  uint index;
-  const char* name;
-} ProgramIdentifier;
-
-typedef enum { INDEX_ID, NAME_ID } IdentifierType;
-
 const MPMDManager* Manager_Init(char** argv);
 void Manager_Finalize(const MPMDManager* manager);
 

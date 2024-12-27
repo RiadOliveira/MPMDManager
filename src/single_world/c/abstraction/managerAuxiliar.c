@@ -22,7 +22,7 @@ void setProgramsData(MPMDManager* manager, char** argv) {
 }
 
 const char* gatherNames(MPI_Comm* managerComm, char** argv, uint worldSize) {
-  int nameSize;
+  uint nameSize;
   char* gatheredNames = malloc(sizeof(char) * worldSize * NAME_MAX_SIZE);
 
   getFilename(gatheredNames, &nameSize, argv);

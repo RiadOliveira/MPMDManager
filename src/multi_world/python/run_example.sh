@@ -6,6 +6,10 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 # Set PYTHONPATH to the src/multi_world/python directory
 export PYTHONPATH="$SCRIPT_DIR"
 
+# Python scripts to execute
+FILES=("first.py" "second.py" "third.py")
+PIDS=()
+
 # Start the intermediary server and create uri.txt
 ompi-server --no-daemonize -r "$SCRIPT_DIR/uri.txt" &
 OMPI_SERVER_PID=$!
@@ -14,10 +18,6 @@ OMPI_SERVER_PID=$!
 while [ ! -f "$SCRIPT_DIR/uri.txt" ]; do
   sleep 0.1
 done
-
-# Python scripts to execute
-FILES=("first.py" "second.py" "third.py")
-PIDS=()
 
 # Run each program with mpirun
 for FILE in "${FILES[@]}"; do

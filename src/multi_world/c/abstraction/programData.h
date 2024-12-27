@@ -1,6 +1,9 @@
+#ifndef PROGRAM_DATA
+#define PROGRAM_DATA
+
 #include <mpi.h>
 
-#include "filenameHandler.h"
+#include "shortcutTypes.h"
 
 typedef union {
   uint index;
@@ -10,7 +13,9 @@ typedef union {
 typedef enum { INDEX_ID, NAME_ID } IdentifierType;
 
 typedef struct {
-  char name[NAME_MAX_SIZE];
-  uint size;
+  ProgramIdentifier identifier;
+  IdentifierType IdentifierType;
   MPI_Comm comm;
 } ProgramData;
+
+#endif
