@@ -25,23 +25,23 @@ void Manager_Finalize(const MPMDManager* manager) {
   free((MPMDManager*)manager);
 }
 
-inline const char* Manager_Local_Name(const MPMDManager* manager) {
+inline const char* Manager_Local_name(const MPMDManager* manager) {
   return localConnection((MPMDManager*)manager)->name;
 }
 
-inline const MPI_Comm* Manager_Local_Comm(const MPMDManager* manager) {
+inline const MPI_Comm* Manager_Local_comm(const MPMDManager* manager) {
   return &localConnection((MPMDManager*)manager)->comm;
 }
 
-inline int Manager_Local_Rank(const MPMDManager* manager) {
-  const MPI_Comm* localComm = Manager_Local_Comm(manager);
+inline int Manager_Local_rank(const MPMDManager* manager) {
+  const MPI_Comm* localComm = Manager_Local_comm(manager);
   int rank;
 
   MPI_Comm_rank(*localComm, &rank);
   return rank;
 }
 
-inline uint Manager_Local_Size(const MPMDManager* manager) {
+inline uint Manager_Local_size(const MPMDManager* manager) {
   return localConnection((MPMDManager*)manager)->size;
 }
 

@@ -4,7 +4,7 @@
 int main(int argc, char** argv) {
   MPI_Init(&argc, &argv);
   const MPMDManager* manager = Manager_Init(argv);
-  int localRank = Manager_Local_Rank(manager);
+  int localRank = Manager_Local_rank(manager);
 
   char connectionName[10];
   ConnectionId nameId = {.name = connectionName};

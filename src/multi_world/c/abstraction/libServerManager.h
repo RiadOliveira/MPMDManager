@@ -18,7 +18,7 @@ const ServerManager* Server_Init(
   char** argv, const char* serverName, uint maxClients
 );
 void Server_Finalize(const ServerManager* manager);
-void Server_Disconnect_Clients(const ServerManager* manager);
+void Server_Disconnect_clients(const ServerManager* manager);
 
 void Server_Open(const ServerManager* manager);
 void Server_Close(const ServerManager* manager);
@@ -26,10 +26,10 @@ void Server_Close(const ServerManager* manager);
 const MPI_Comm* Server_Accept(
   const ServerManager* manager, const char* clientName
 );
-const MPI_Comm* Server_Retrieve_Client_Comm(
+const MPI_Comm* Server_Retrieve_Client_comm(
   const ServerManager* manager, ConnectionId id, IdType idType
 );
 
-const char* Server_Name(const ServerManager* manager);
+const char* Server_Local_name(const ServerManager* manager);
 
 #endif

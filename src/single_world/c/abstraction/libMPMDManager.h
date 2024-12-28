@@ -14,10 +14,10 @@ typedef struct {
 const MPMDManager* Manager_Init(char** argv);
 void Manager_Finalize(const MPMDManager* manager);
 
-const char* Manager_Local_Name(const MPMDManager* manager);
-const MPI_Comm* Manager_Local_Comm(const MPMDManager* manager);
-int Manager_Local_Rank(const MPMDManager* manager);
-uint Manager_Local_Size(const MPMDManager* manager);
+const char* Manager_Local_name(const MPMDManager* manager);
+const MPI_Comm* Manager_Local_comm(const MPMDManager* manager);
+int Manager_Local_rank(const MPMDManager* manager);
+uint Manager_Local_size(const MPMDManager* manager);
 
 const MPI_Comm* Manager_Comm_to(
   const MPMDManager* manager, ConnectionId id, IdType idType

@@ -15,7 +15,7 @@ const ServerManager* Server_Init(
 }
 
 void Server_Finalize(const ServerManager* manager) {
-  Server_Disconnect_Clients(manager);
+  Server_Disconnect_clients(manager);
   free(manager->clients.connections);
 
   MPI_Comm* managerComm = (MPI_Comm*)&manager->comm;
@@ -25,7 +25,7 @@ void Server_Finalize(const ServerManager* manager) {
   free((ServerManager*)manager);
 }
 
-inline void Server_Disconnect_Clients(const ServerManager* manager) {
+inline void Server_Disconnect_clients(const ServerManager* manager) {
   ConnectionsData* clients = (ConnectionsData*)&manager->clients;
   finalizeConnections(clients);
 }
@@ -56,14 +56,14 @@ const MPI_Comm* Server_Accept(
   return &client->comm;
 }
 
-const MPI_Comm* Server_Retrieve_Client_Comm(
+const MPI_Comm* Server_Retrieve_Client_comm(
   const ServerManager* manager, ConnectionId id, IdType idType
 ) {
   ConnectionsData* clients = (ConnectionsData*)&manager->clients;
   return &findConnectionOrError(clients, id, idType)->comm;
 }
 
-inline const char* Server_Name(const ServerManager* manager) {
+inline const char* Server_Local_name(const ServerManager* manager) {
   return manager->name;
 }
 

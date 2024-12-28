@@ -15,7 +15,7 @@ inline const ClientManager* Client_Init() {
 }
 
 void Client_Finalize(const ClientManager* manager) {
-  Client_Disconnect_Servers(manager);
+  Client_Disconnect_servers(manager);
   free(manager->servers.connections);
 
   MPI_Comm* managerComm = (MPI_Comm*)&manager->comm;
@@ -24,7 +24,7 @@ void Client_Finalize(const ClientManager* manager) {
   free((ClientManager*)manager);
 }
 
-void Client_Disconnect_Servers(const ClientManager* manager) {
+void Client_Disconnect_servers(const ClientManager* manager) {
   ConnectionsData* servers = (ConnectionsData*)&manager->servers;
   finalizeConnections(servers);
 }
@@ -44,7 +44,7 @@ const MPI_Comm* Client_Connect(
   return &server->comm;
 }
 
-const MPI_Comm* Client_Retrieve_Server_Comm(
+const MPI_Comm* Client_Retrieve_Server_comm(
   const ClientManager* manager, ConnectionId id, IdType idType
 ) {
   ConnectionsData* servers = (ConnectionsData*)&manager->servers;
