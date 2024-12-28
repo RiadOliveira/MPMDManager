@@ -3,7 +3,7 @@
 
 #include <mpi.h>
 
-#include "shortcutTypes.h"
+#include "filenameHandler.h"
 
 typedef union {
   uint index;
@@ -13,10 +13,9 @@ typedef union {
 typedef enum { INDEX_ID, NAME_ID } IdType;
 
 typedef struct {
-  bool active;
-  ConnectionId id;
-  IdType idType;
+  char name[NAME_MAX_SIZE];
   MPI_Comm comm;
+  bool active;
 } Connection;
 
 #endif

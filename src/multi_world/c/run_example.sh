@@ -17,7 +17,7 @@ OMPI_SERVER_PID=$!
 
 # Compile the .c files
 for FILE in "${FILES[@]}"; do
-  mpicc -I"$INCLUDE_DIR" -o "$OUTPUT_DIR/$FILE.out" "$SCRIPT_DIR/abstraction/filenameHandler.c" "$SCRIPT_DIR/abstraction/connectionsData.c" "$SCRIPT_DIR/abstraction/libClientManager.c" "$SCRIPT_DIR/abstraction/libServerManager.c" "$SCRIPT_DIR/example/message.c" "$OUTPUT_DIR/$FILE.c"
+  mpicc -I"$INCLUDE_DIR" -o "$OUTPUT_DIR/$FILE.out" "$SCRIPT_DIR/abstraction/filenameHandler.c" "$SCRIPT_DIR/abstraction/error.c" "$SCRIPT_DIR/abstraction/connectionsData.c" "$SCRIPT_DIR/abstraction/libClientManager.c" "$SCRIPT_DIR/abstraction/libServerManager.c" "$SCRIPT_DIR/example/message.c" "$OUTPUT_DIR/$FILE.c"
 done
 
 # Wait for uri.txt to be created

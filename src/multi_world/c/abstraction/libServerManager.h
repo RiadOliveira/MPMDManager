@@ -23,10 +23,10 @@ void Server_Disconnect_Clients(const ServerManager* manager);
 void Server_Open(const ServerManager* manager);
 void Server_Close(const ServerManager* manager);
 
-void Server_Accept(
-  const ServerManager* manager, ConnectionId id, IdType idType
+const MPI_Comm* Server_Accept(
+  const ServerManager* manager, const char* clientName
 );
-void Server_Comm_to_Connected_Client(ConnectionId id, IdType idType);
+const MPI_Comm* Server_Retrieve_Client_Comm(ConnectionId id, IdType idType);
 
 const char* Server_Name(const ServerManager* manager);
 

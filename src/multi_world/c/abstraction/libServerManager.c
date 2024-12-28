@@ -15,9 +15,8 @@ const ServerManager* Server_Init(
 }
 
 void Server_Finalize(const ServerManager* manager) {
-  ConnectionsData* clientsData = &manager->clientsData;
-  finalizeConnections(clientsData);
-  free(clientsData->connections);
+  Server_Disconnect_Clients(manager);
+  free(manager->clientsData.connections);
 
   MPI_Comm* managerComm = (MPI_Comm*)&manager->comm;
   if(managerComm != NULL) MPI_Comm_disconnect(managerComm);
@@ -26,29 +25,42 @@ void Server_Finalize(const ServerManager* manager) {
   free((ServerManager*)manager);
 }
 
-void Server_Disconnect_Clients(const ServerManager* manager) {}
+inline void Server_Disconnect_Clients(const ServerManager* manager) {
+  ConnectionsData* clientsData = (ConnectionsData*)&manager->clientsData;
+  finalizeConnections(clientsData);
+}
 
-void Server_Open(const ServerManager* manager) {
+inline void Server_Open(const ServerManager* manager) {
   char* portName = (char*)manager->portName;
 
   MPI_Open_port(MPI_INFO_NULL, portName);
   MPI_Publish_name(manager->name, MPI_INFO_NULL, portName);
 }
 
-void Server_Close(const ServerManager* manager) {
+inline void Server_Close(const ServerManager* manager) {
   const char* portName = manager->portName;
 
   MPI_Unpublish_name(manager->name, MPI_INFO_NULL, portName);
   MPI_Close_port(portName);
 }
 
-void Server_Accept(
-  const ServerManager* manager, ConnectionId id, IdType idType
-) {}
+const MPI_Comm* Server_Accept(
+  const ServerManager* manager, const char* clientName
+) {
+  MPI_Comm clientComm;
+  char* portName = (char*)manager->portName;
+  MPI_Comm_accept(portName, MPI_INFO_NULL, 0, manager->comm, &clientComm);
 
-void Server_Comm_to_Connected_Client(ConnectionId id, IdType idType) {}
+  ConnectionsData* clientsData = (ConnectionsData*)&manager->clientsData;
+  Connection* client = addConnection(clientsData, clientName, &clientComm);
+  return &client->comm;
+}
 
-const char* Server_Name(const ServerManager* manager) { return manager->name; }
+const MPI_Comm* Server_Retrieve_Client_Comm(ConnectionId id, IdType idType) {}
+
+inline const char* Server_Name(const ServerManager* manager) {
+  return manager->name;
+}
 
 void setServerName(
   ServerManager* manager, char** argv, const char* serverName

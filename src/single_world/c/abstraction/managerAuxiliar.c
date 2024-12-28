@@ -1,5 +1,7 @@
 #include "managerAuxiliar.h"
 
+bool streql(const char*, const char*);
+
 void setConnections(MPMDManager* manager, char** argv) {
   AuxiliarData auxiliar;
   int worldRank, worldSize;
@@ -80,20 +82,19 @@ void setRemoteConnections(MPMDManager* manager, AuxiliarData* auxiliar) {
   for(uint ind = 0; ind < connectionsSize; ind++) {
     if(ind == localInd) continue;
 
-    Connection* currentConnection = &manager->connections[ind];
+    Connection* current = &manager->connections[ind];
     AuxiliarConnection* currentAuxiliar = &auxiliar->connections[ind];
 
-    strcpy(currentConnection->name, currentAuxiliar->name);
-    currentConnection->size = currentAuxiliar->size;
+    strcpy(current->name, currentAuxiliar->name);
+    current->size = currentAuxiliar->size;
 
     MPI_Intercomm_create(
-      *localComm, 0, manager->comm, currentAuxiliar->leader, 0,
-      &currentConnection->comm
+      *localComm, 0, manager->comm, currentAuxiliar->leader, 0, &current->comm
     );
   }
 }
 
-Connection* localConnection(const MPMDManager* manager) {
+inline Connection* localConnection(const MPMDManager* manager) {
   return &manager->connections[manager->localInd];
 }
 
@@ -106,28 +107,30 @@ Connection* findConnectionOrError(
   if(indexId) connectionFound = findConnectionByIndex(manager, id.index);
   else connectionFound = findConnectionByName(manager, id.name);
 
-  if(connectionFound == NULL) MPI_Abort(manager->comm, EXIT_FAILURE);
+  if(connectionFound == NULL) exitWithError("Connection not found!");
   return connectionFound;
 }
 
-Connection* findConnectionByIndex(const MPMDManager* manager, uint index) {
+inline Connection* findConnectionByIndex(
+  const MPMDManager* manager, uint index
+) {
   if(index >= manager->connectionsSize) return NULL;
   return &manager->connections[index];
 }
 
 Connection* findConnectionByName(const MPMDManager* manager, const char* name) {
   Connection* connections = manager->connections;
-  const uint connectionsSize = manager->connectionsSize;
+  const uint size = manager->connectionsSize;
 
-  for(uint ind = 0; ind < connectionsSize; ind++) {
-    Connection* currentConnection = &connections[ind];
-    if(streql(name, currentConnection->name)) return currentConnection;
+  for(uint ind = 0; ind < size; ind++) {
+    Connection* current = &connections[ind];
+    if(streql(name, current->name)) return current;
   }
 
   return NULL;
 }
 
-bool streql(const char* first, const char* second) {
+inline bool streql(const char* first, const char* second) {
   if(first == NULL || second == NULL) return false;
   return strcmp(first, second) == 0;
 }

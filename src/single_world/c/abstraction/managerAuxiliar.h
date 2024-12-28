@@ -3,6 +3,7 @@
 
 #include <string.h>
 
+#include "error.h"
 #include "libMPMDManager.h"
 
 typedef struct {
@@ -35,7 +36,5 @@ Connection* findConnectionOrError(
 );
 Connection* findConnectionByIndex(const MPMDManager* manager, uint index);
 Connection* findConnectionByName(const MPMDManager* manager, const char* name);
-
-bool streql(const char* first, const char* second);
 
 #endif
