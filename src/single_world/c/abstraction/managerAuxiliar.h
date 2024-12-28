@@ -29,12 +29,12 @@ void setLocalConnection(
 );
 void setRemoteConnections(MPMDManager* manager, AuxiliarData* auxiliar);
 
-Connection* localConnection(const MPMDManager* manager);
+Connection* localConnection(MPMDManager* manager);
 
 Connection* findConnectionOrError(
-  const MPMDManager* manager, ConnectionId id, IdType idType
+  MPMDManager* manager, ConnectionId id, IdType idType
 );
-Connection* findConnectionByIndex(const MPMDManager* manager, uint index);
-Connection* findConnectionByName(const MPMDManager* manager, const char* name);
+Connection* findConnectionByIndex(MPMDManager* manager, uint index);
+Connection* findConnectionByName(MPMDManager* manager, const char* name);
 
 #endif

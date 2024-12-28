@@ -44,7 +44,7 @@ class ClientManager:
     max_attempts = attempts_data.max_attempts_to_connect
     initial_wait_time = attempts_data.initial_attempts_wait_time_in_secs
     max_attempts_wait_time = attempts_data.max_attempts_wait_time_in_secs
-    
+
     while(attempts < max_attempts):
       try:
         port_name = MPI.Lookup_name(server_name)

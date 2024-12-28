@@ -16,9 +16,7 @@ void initConnections(ConnectionsData* data, uint maxSize) {
   data->connections = malloc(sizeof(Connection) * parsedMax);
 
   Connection* connections = data->connections;
-  for(uint ind = 0; ind < parsedMax; ind++) {
-    connections[ind].active = false;
-  }
+  for(uint ind = 0; ind < parsedMax; ind++) connections[ind].active = false;
 }
 
 void finalizeConnections(ConnectionsData* data) {
@@ -37,17 +35,35 @@ void finalizeConnections(ConnectionsData* data) {
 Connection* addConnection(
   ConnectionsData* data, const char* name, MPI_Comm* comm
 ) {
-  if(data->size >= data->maxSize) MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+  const bool maxSizeReached = data->size >= data->maxSize;
+  if(maxSizeReached) exitWithError("Connections max size reached!");
+
+  const bool existsByName = findConnectionByName(data, name) != NULL;
+  if(existsByName) {
+    exitWithError("A connection named '", name, "' already exists!");
+  }
 
   uint ind;
   Connection* newConnection = getNextUnactiveConnection(data, &ind);
-
   setNewConnectionName(newConnection, name, ind);
   newConnection->active = true;
   newConnection->comm = *comm;
 
   data->size++;
   return newConnection;
+}
+
+Connection* findConnectionOrError(
+  ConnectionsData* data, ConnectionId id, IdType idType
+) {
+  Connection* connectionFound;
+  const bool indexId = idType == INDEX_ID;
+
+  if(indexId) connectionFound = findConnectionByIndex(data, id.index);
+  else connectionFound = findConnectionByName(data, id.name);
+
+  if(connectionFound == NULL) exitWithError("Connection not found!");
+  return connectionFound;
 }
 
 Connection* getNextUnactiveConnection(ConnectionsData* data, uint* ind) {
@@ -78,19 +94,6 @@ inline void setNewConnectionName(
   else sprintf(connectionName, "%d", connectionInd);
 }
 
-Connection* findConnectionOrError(
-  ConnectionsData* data, ConnectionId id, IdType idType
-) {
-  Connection* connectionFound;
-  const bool indexId = idType == INDEX_ID;
-
-  if(indexId) connectionFound = findConnectionByIndex(data, id.index);
-  else connectionFound = findConnectionByName(data, id.name);
-
-  if(connectionFound == NULL) exitWithError("Connection not found!");
-  return connectionFound;
-}
-
 inline Connection* findConnectionByIndex(ConnectionsData* data, uint index) {
   if(index >= data->maxSize) return NULL;
 
@@ -99,6 +102,8 @@ inline Connection* findConnectionByIndex(ConnectionsData* data, uint index) {
 }
 
 Connection* findConnectionByName(ConnectionsData* data, const char* name) {
+  if(name == NULL) return NULL;
+
   Connection* connections = data->connections;
   const uint maxSize = data->maxSize;
 

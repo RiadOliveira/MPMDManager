@@ -94,12 +94,12 @@ void setRemoteConnections(MPMDManager* manager, AuxiliarData* auxiliar) {
   }
 }
 
-inline Connection* localConnection(const MPMDManager* manager) {
+inline Connection* localConnection(MPMDManager* manager) {
   return &manager->connections[manager->localInd];
 }
 
 Connection* findConnectionOrError(
-  const MPMDManager* manager, ConnectionId id, IdType idType
+  MPMDManager* manager, ConnectionId id, IdType idType
 ) {
   Connection* connectionFound;
   const bool indexId = idType == INDEX_ID;
@@ -111,14 +111,14 @@ Connection* findConnectionOrError(
   return connectionFound;
 }
 
-inline Connection* findConnectionByIndex(
-  const MPMDManager* manager, uint index
-) {
+inline Connection* findConnectionByIndex(MPMDManager* manager, uint index) {
   if(index >= manager->connectionsSize) return NULL;
   return &manager->connections[index];
 }
 
-Connection* findConnectionByName(const MPMDManager* manager, const char* name) {
+Connection* findConnectionByName(MPMDManager* manager, const char* name) {
+  if(name == NULL) return NULL;
+
   Connection* connections = manager->connections;
   const uint size = manager->connectionsSize;
 

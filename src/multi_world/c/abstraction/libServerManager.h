@@ -10,7 +10,7 @@
 
 typedef struct {
   char name[NAME_MAX_SIZE], portName[MPI_MAX_PORT_NAME];
-  ConnectionsData clientsData;
+  ConnectionsData clients;
   MPI_Comm comm;
 } ServerManager;
 
@@ -26,7 +26,9 @@ void Server_Close(const ServerManager* manager);
 const MPI_Comm* Server_Accept(
   const ServerManager* manager, const char* clientName
 );
-const MPI_Comm* Server_Retrieve_Client_Comm(ConnectionId id, IdType idType);
+const MPI_Comm* Server_Retrieve_Client_Comm(
+  const ServerManager* manager, ConnectionId id, IdType idType
+);
 
 const char* Server_Name(const ServerManager* manager);
 

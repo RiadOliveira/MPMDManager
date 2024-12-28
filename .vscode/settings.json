@@ -11,6 +11,8 @@
     "errorthrower.h": "c",
     "string": "c",
     "error.h": "c",
-    "filenamehandler.h": "c"
+    "filenamehandler.h": "c",
+    "limits": "c",
+    "libclientmanager.h": "c"
   }
 }

@@ -26,11 +26,11 @@ void Manager_Finalize(const MPMDManager* manager) {
 }
 
 inline const char* Manager_Local_Name(const MPMDManager* manager) {
-  return localConnection(manager)->name;
+  return localConnection((MPMDManager*)manager)->name;
 }
 
 inline const MPI_Comm* Manager_Local_Comm(const MPMDManager* manager) {
-  return &localConnection(manager)->comm;
+  return &localConnection((MPMDManager*)manager)->comm;
 }
 
 inline int Manager_Local_Rank(const MPMDManager* manager) {
@@ -42,17 +42,17 @@ inline int Manager_Local_Rank(const MPMDManager* manager) {
 }
 
 inline uint Manager_Local_Size(const MPMDManager* manager) {
-  return localConnection(manager)->size;
+  return localConnection((MPMDManager*)manager)->size;
 }
 
 inline const MPI_Comm* Manager_Comm_to(
   const MPMDManager* manager, ConnectionId id, IdType idType
 ) {
-  return &findConnectionOrError(manager, id, idType)->comm;
+  return &findConnectionOrError((MPMDManager*)manager, id, idType)->comm;
 }
 
 inline uint Manager_Size_of(
   const MPMDManager* manager, ConnectionId id, IdType idType
 ) {
-  return findConnectionOrError(manager, id, idType)->size;
+  return findConnectionOrError((MPMDManager*)manager, id, idType)->size;
 }
