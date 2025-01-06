@@ -22,7 +22,7 @@ done
 
 # Wait for uri.txt to be created
 while [ ! -f "$SCRIPT_DIR/uri.txt" ]; do
-  sleep 0.1
+  sleep 0.01
 done
 
 # Run each program with mpirun
