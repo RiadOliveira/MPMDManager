@@ -1,6 +1,6 @@
 #include "managerAuxiliar.h"
 
-const MPMDManager* Manager_Init(char** argv) {
+inline const MPMDManager* Manager_Init(char** argv) {
   MPMDManager* manager = malloc(sizeof(MPMDManager));
 
   MPI_Comm_dup(MPI_COMM_WORLD, &manager->comm);
@@ -9,7 +9,7 @@ const MPMDManager* Manager_Init(char** argv) {
   return manager;
 }
 
-void Manager_Finalize(const MPMDManager* manager) {
+inline void Manager_Finalize(const MPMDManager* manager) {
   Connection* connections = manager->connections;
   const uint connectionsSize = manager->connectionsSize;
 

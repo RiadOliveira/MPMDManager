@@ -3,18 +3,20 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
 void attemptServerPortNameLookup(char*, const char*, const ConnectAttemptData*);
+uint getCurrentWaitTime(const ConnectAttemptData*, uint);
+void sleepMs(uint);
 
 inline const ClientManager* Client_Init(uint maxServers) {
   ClientManager* manager = malloc(sizeof(ClientManager));
 
   MPI_Comm_dup(MPI_COMM_SELF, &manager->comm);
-  MPI_Comm_set_errhandler(manager->comm, MPI_ERRORS_RETURN);
+  MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
   initConnections(&manager->servers, maxServers);
 
   return manager;
 }
 
-void Client_Finalize(const ClientManager* manager) {
+inline void Client_Finalize(const ClientManager* manager) {
   Client_Disconnect_servers(manager);
   free(manager->servers.connections);
 
@@ -24,7 +26,7 @@ void Client_Finalize(const ClientManager* manager) {
   free((ClientManager*)manager);
 }
 
-void Client_Disconnect_servers(const ClientManager* manager) {
+inline void Client_Disconnect_servers(const ClientManager* manager) {
   ConnectionsData* servers = (ConnectionsData*)&manager->servers;
   finalizeConnections(servers);
 }
@@ -44,7 +46,7 @@ const MPI_Comm* Client_Connect(
   return &server->comm;
 }
 
-const MPI_Comm* Client_Retrieve_Server_comm(
+inline const MPI_Comm* Client_Retrieve_Server_comm(
   const ClientManager* manager, ConnectionId id, IdType idType
 ) {
   ConnectionsData* servers = (ConnectionsData*)&manager->servers;
@@ -54,25 +56,46 @@ const MPI_Comm* Client_Retrieve_Server_comm(
 void attemptServerPortNameLookup(
   char* portName, const char* serverName, const ConnectAttemptData* data
 ) {
-  const static ConnectAttemptData DEFAULT_ATTEMPT_DATA = {10, 1, 10};
-  const ConnectAttemptData* parsedData =
-    data == NULL ? &DEFAULT_ATTEMPT_DATA : data;
-
+  const static ConnectAttemptData DEFAULT_DATA = {10U, 1U, 1U, 10U};
+  const ConnectAttemptData* parsedData = data == NULL ? &DEFAULT_DATA : data;
   const uint maxAttempts = parsedData->maxAttempts;
-  const uint initialWait = parsedData->initialWaitTimeInSecs;
-  const uint maxWait = parsedData->maxWaitTimeInSecs;
 
-  uint attempts = 0;
+  MPI_Errhandler originalErrorHandler;
+  MPI_Comm_get_errhandler(MPI_COMM_WORLD, &originalErrorHandler);
+  MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
+
   for(uint attempts = 0; attempts < maxAttempts; attempts++) {
     int errorValue = MPI_Lookup_name(serverName, MPI_INFO_NULL, portName);
-    if(errorValue == MPI_SUCCESS) return;
+    if(errorValue == MPI_SUCCESS) {
+      MPI_Comm_set_errhandler(MPI_COMM_WORLD, originalErrorHandler);
+      return;
+    }
 
-    const uint waitTime = min(maxWait, initialWait + attempts);
-    sleep(waitTime);
+    sleepMs(getCurrentWaitTime(parsedData, attempts));
   }
 
   exitWithError(
     "Failed to lookup port name for server '", serverName, "' after ",
     maxAttempts, " attempts!"
   );
+}
+
+inline uint getCurrentWaitTime(const ConnectAttemptData* data, uint attempts) {
+  return min(
+    data->maxWaitMs, data->initialWaitMs + attempts * data->waitIncrementMs
+  );
+}
+
+inline void sleepMs(uint milliseconds) {
+#ifdef _WIN32
+  Sleep(milliseconds);
+#else
+  struct timespec ts;
+
+  ts.tv_sec = milliseconds / 1000U;
+  const uint remainingMs = milliseconds - (ts.tv_sec * 1000U);
+  ts.tv_nsec = remainingMs * 1000000L;
+
+  nanosleep(&ts, NULL);
+#endif
 }

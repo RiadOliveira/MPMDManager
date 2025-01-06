@@ -13,6 +13,8 @@
     "error.h": "c",
     "filenamehandler.h": "c",
     "limits": "c",
-    "libclientmanager.h": "c"
+    "libclientmanager.h": "c",
+    "libservermanager.h": "c",
+    "message.h": "c"
   }
 }

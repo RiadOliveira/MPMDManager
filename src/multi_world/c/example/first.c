@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
   getMessageType(&MessageType);
 
   if(rank == 0) {
-    const ServerManager* manager = Server_Init(argv, NULL, 1);
+    const ServerManager* manager = Server_Init(argv, NULL, 1U);
     Server_Open(manager);
     const MPI_Comm* secondComm = Server_Accept(manager, NULL);
 
@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
     Server_Finalize(manager);
   } else if(rank == 1) {
-    const ClientManager* manager = Client_Init(1);
+    const ClientManager* manager = Client_Init(1U);
     const MPI_Comm* thirdComm = Client_Connect(manager, "third0", NULL);
 
     MPI_Recv(&message, 1, MessageType, 0, 0, *thirdComm, MPI_STATUS_IGNORE);

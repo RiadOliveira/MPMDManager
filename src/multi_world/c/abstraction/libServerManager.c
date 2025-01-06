@@ -2,7 +2,7 @@
 
 void setServerName(ServerManager*, char**, const char*);
 
-const ServerManager* Server_Init(
+inline const ServerManager* Server_Init(
   char** argv, const char* serverName, uint maxClients
 ) {
   ServerManager* manager = malloc(sizeof(ServerManager));
@@ -14,7 +14,7 @@ const ServerManager* Server_Init(
   return manager;
 }
 
-void Server_Finalize(const ServerManager* manager) {
+inline void Server_Finalize(const ServerManager* manager) {
   Server_Disconnect_clients(manager);
   free(manager->clients.connections);
 
@@ -56,7 +56,7 @@ const MPI_Comm* Server_Accept(
   return &client->comm;
 }
 
-const MPI_Comm* Server_Retrieve_Client_comm(
+inline const MPI_Comm* Server_Retrieve_Client_comm(
   const ServerManager* manager, ConnectionId id, IdType idType
 ) {
   ConnectionsData* clients = (ConnectionsData*)&manager->clients;

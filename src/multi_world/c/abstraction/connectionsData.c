@@ -8,7 +8,7 @@ Connection* findConnectionByName(ConnectionsData*, const char*);
 
 bool streql(const char*, const char*);
 
-void initConnections(ConnectionsData* data, uint maxSize) {
+inline void initConnections(ConnectionsData* data, uint maxSize) {
   const uint parsedMax = maxSize == 0 ? DEFAULT_MAX_CONNECTIONS : maxSize;
 
   data->size = 0;
@@ -19,7 +19,7 @@ void initConnections(ConnectionsData* data, uint maxSize) {
   for(uint ind = 0; ind < parsedMax; ind++) connections[ind].active = false;
 }
 
-void finalizeConnections(ConnectionsData* data) {
+inline void finalizeConnections(ConnectionsData* data) {
   const uint maxSize = data->maxSize;
   Connection* connections = data->connections;
 
@@ -53,7 +53,7 @@ Connection* addConnection(
   return newConnection;
 }
 
-Connection* findConnectionOrError(
+inline Connection* findConnectionOrError(
   ConnectionsData* data, ConnectionId id, IdType idType
 ) {
   Connection* connectionFound;
@@ -101,7 +101,9 @@ inline Connection* findConnectionByIndex(ConnectionsData* data, uint index) {
   return connectionFound->active ? connectionFound : NULL;
 }
 
-Connection* findConnectionByName(ConnectionsData* data, const char* name) {
+inline Connection* findConnectionByName(
+  ConnectionsData* data, const char* name
+) {
   if(name == NULL) return NULL;
 
   Connection* connections = data->connections;

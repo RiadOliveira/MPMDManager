@@ -23,7 +23,9 @@ void setConnections(MPMDManager* manager, char** argv) {
   free((char*)gatheredNames);
 }
 
-const char* gatherNames(MPI_Comm* managerComm, char** argv, uint worldSize) {
+inline const char* gatherNames(
+  MPI_Comm* managerComm, char** argv, uint worldSize
+) {
   uint nameSize;
   char* gatheredNames = malloc(sizeof(char) * worldSize * NAME_MAX_SIZE);
 
@@ -98,7 +100,7 @@ inline Connection* localConnection(MPMDManager* manager) {
   return &manager->connections[manager->localInd];
 }
 
-Connection* findConnectionOrError(
+inline Connection* findConnectionOrError(
   MPMDManager* manager, ConnectionId id, IdType idType
 ) {
   Connection* connectionFound;
@@ -116,7 +118,9 @@ inline Connection* findConnectionByIndex(MPMDManager* manager, uint index) {
   return &manager->connections[index];
 }
 
-Connection* findConnectionByName(MPMDManager* manager, const char* name) {
+inline Connection* findConnectionByName(
+  MPMDManager* manager, const char* name
+) {
   if(name == NULL) return NULL;
 
   Connection* connections = manager->connections;
