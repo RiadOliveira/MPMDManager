@@ -56,7 +56,8 @@ inline const MPI_Comm* Client_Retrieve_Server_comm(
 void attemptServerPortNameLookup(
   char* portName, const char* serverName, const ConnectAttemptData* data
 ) {
-  const static ConnectAttemptData DEFAULT_DATA = {10U, 1U, 1U, 10U};
+  const static ConnectAttemptData DEFAULT_DATA = {10U, 1000U, 1000U, 10000U};
+
   const ConnectAttemptData* parsedData = data == NULL ? &DEFAULT_DATA : data;
   const uint maxAttempts = parsedData->maxAttempts;
 
