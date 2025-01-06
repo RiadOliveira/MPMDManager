@@ -13,17 +13,17 @@ int main(int argc, char** argv) {
   getMessageType(&MessageType);
 
   if(rank == 0) {
-    const ServerManager* manager = Server_Init(argv, NULL, 2);
+    const ServerManager* manager = Server_Init(argv, NULL, 1);
     Server_Open(manager);
     const MPI_Comm* thirdComm = Server_Accept(manager, NULL);
 
     fillMessage(&message, "0|Second to 1|Third", 2031);
-    MPI_Send(&message, 1, MessageType, 1, 0, *thirdComm);
+    MPI_Send(&message, 1, MessageType, 0, 0, *thirdComm);
     printMessage("(Send) 0|Second -> 1|Third: ", &message);
 
     Server_Finalize(manager);
   } else if(rank == 1) {
-    const ClientManager* manager = Client_Init();
+    const ClientManager* manager = Client_Init(1);
     const MPI_Comm* firstComm = Client_Connect(manager, "first0", NULL);
 
     MPI_Recv(&message, 1, MessageType, 0, 0, *firstComm, MPI_STATUS_IGNORE);

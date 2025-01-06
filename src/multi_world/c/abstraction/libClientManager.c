@@ -4,12 +4,12 @@
 
 void attemptServerPortNameLookup(char*, const char*, const ConnectAttemptData*);
 
-inline const ClientManager* Client_Init() {
+inline const ClientManager* Client_Init(uint maxServers) {
   ClientManager* manager = malloc(sizeof(ClientManager));
-  MPI_Comm* managerComm = &manager->comm;
 
-  MPI_Comm_dup(MPI_COMM_WORLD, managerComm);
-  MPI_Comm_set_errhandler(*managerComm, MPI_ERRORS_RETURN);
+  MPI_Comm_dup(MPI_COMM_SELF, &manager->comm);
+  MPI_Comm_set_errhandler(manager->comm, MPI_ERRORS_RETURN);
+  initConnections(&manager->servers, maxServers);
 
   return manager;
 }

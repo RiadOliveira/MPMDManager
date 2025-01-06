@@ -7,7 +7,7 @@ const ServerManager* Server_Init(
 ) {
   ServerManager* manager = malloc(sizeof(ServerManager));
 
-  MPI_Comm_dup(MPI_COMM_WORLD, &manager->comm);
+  MPI_Comm_dup(MPI_COMM_SELF, &manager->comm);
   setServerName(manager, argv, serverName);
   initConnections(&manager->clients, maxClients);
 

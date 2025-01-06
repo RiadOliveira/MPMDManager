@@ -16,7 +16,7 @@ typedef struct {
   MPI_Comm comm;
 } ClientManager;
 
-const ClientManager* Client_Init();
+const ClientManager* Client_Init(uint maxServers);
 void Client_Finalize(const ClientManager* manager);
 void Client_Disconnect_servers(const ClientManager* manager);
 

@@ -2,10 +2,10 @@
 
 const MPMDManager* Manager_Init(char** argv) {
   MPMDManager* manager = malloc(sizeof(MPMDManager));
-  MPI_Comm* managerComm = &manager->comm;
-  MPI_Comm_dup(MPI_COMM_WORLD, managerComm);
 
+  MPI_Comm_dup(MPI_COMM_WORLD, &manager->comm);
   setConnections(manager, argv);
+
   return manager;
 }
 
