@@ -1,5 +1,5 @@
 from .server_manager import ServerManager
 from .client_manager import ClientManager
-from .request_attempts_data import RequestAttemptsData
+from .connect_attempt_data import ConnectAttemptData
 
-__all__ = [ServerManager, ClientManager, RequestAttemptsData]
+__all__ = [ServerManager, ClientManager, ConnectAttemptData]

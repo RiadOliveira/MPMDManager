@@ -35,8 +35,9 @@ inline void finalizeConnections(ConnectionsData* data) {
   const uint maxSize = data->maxSize;
   Connection* connections = data->connections;
 
-  for(uint ind = 0; ind < maxSize; ind++)
+  for(uint ind = 0; ind < maxSize; ind++) {
     finalizeConnection(data, &connections[ind]);
+  }
 }
 
 inline void validateConnectionAddition(

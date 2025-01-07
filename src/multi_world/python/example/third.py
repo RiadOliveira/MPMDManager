@@ -1,9 +1,7 @@
 from mpi4py import MPI
 from abstraction import ServerManager, ClientManager
 
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-size = comm.Get_size()
+rank = MPI.COMM_WORLD.Get_rank()
 
 if rank == 0:
   ServerManager.init()
@@ -23,7 +21,7 @@ if rank == 0:
 elif rank == 1:
   ClientManager.init()
 
-  second_comm = ClientManager.request('second0')
+  second_comm = ClientManager.connect('second0')
   received_object = second_comm.recv(source=0)
   
   print('(Recv) 1|Third  <- 0|Second: ', end='')

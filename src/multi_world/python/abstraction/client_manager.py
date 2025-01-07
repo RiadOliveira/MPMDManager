@@ -3,59 +3,68 @@ from time import sleep
 
 from .manager import Manager
 from .connection import Connection
-from .request_attempts_data import RequestAttemptsData
+from .connect_attempt_data import ConnectAttemptData
 
-class ClientManager:
+class ClientManager(Manager):
   __comm = MPI.COMM_NULL
-  __servers: list[Connection] = []
 
   @staticmethod
   def init(): ClientManager.__comm = MPI.COMM_SELF.Dup()
 
   @staticmethod
-  def request(server_name: str, attempts_data = RequestAttemptsData()):
-    port_name = ClientManager.__try_to_connect(server_name, attempts_data)
-    server_intercomm = ClientManager.__comm.Connect(port_name)
-
-    server_data = Connection(server_name, server_intercomm)
-    ClientManager.__servers.append(server_data)
-    return server_intercomm
-
-  @staticmethod
-  def retrieve_server_comm(server_id: str | int):
-    return Manager.retrieve_connection_comm(
-      server_id, ClientManager.__servers
-    )
-  
-  @staticmethod
-  def disconnect_servers(): ClientManager.__servers.clear()
-
-  @staticmethod
   def finalize(): 
     ClientManager.disconnect_servers()
 
-    if ClientManager.__comm != MPI.COMM_NULL: ClientManager.__comm.Disconnect()
+    manager_comm = ClientManager.__comm
+    if manager_comm != MPI.COMM_NULL: manager_comm.Disconnect()
 
   @staticmethod
-  def __try_to_connect(
-    server_name: str, attempts_data: RequestAttemptsData
-  ):
-    attempts = 0
-    max_attempts = attempts_data.max_attempts_to_connect
-    initial_wait_time = attempts_data.initial_attempts_wait_time_in_secs
-    max_attempts_wait_time = attempts_data.max_attempts_wait_time_in_secs
+  def disconnect_server(server_id: str | int):
+    ind_found = Manager._find_connection_ind_or_error(server_id)
+    Manager._connections.pop(ind_found)
 
-    while(attempts < max_attempts):
+  @staticmethod
+  def disconnect_servers(): Manager._connections.clear()
+
+  @staticmethod
+  def connect(server_name: str, attemptData = ConnectAttemptData()):
+    Manager._validate_connection_addition(server_name)
+
+    port_name = ClientManager.__attempt_server_port_name_lookup(
+      server_name, attemptData
+    )
+    server_comm = ClientManager.__comm.Connect(port_name)
+
+    server_added = Connection(server_name, server_comm)
+    Manager._connections.append(server_added)
+    return server_added.comm
+
+  @staticmethod
+  def retrieve_server_comm(server_id: str | int):
+    return Manager._find_connection_or_error(server_id).comm
+
+  @staticmethod
+  def __attempt_server_port_name_lookup(
+    server_name: str, data: ConnectAttemptData
+  ):
+    max_attempts = data.max_attempts
+
+    for attempts in range(max_attempts):
       try:
         port_name = MPI.Lookup_name(server_name)
         return port_name
       except:
-        backoff = min(
-          initial_wait_time * 2 ** attempts, max_attempts_wait_time
-        )
-        attempts += 1
-        sleep(backoff)
+        wait_time_ms = ClientManager.__get_current_wait_time(data, attempts)
+        ClientManager.__sleep_ms(wait_time_ms)
 
     raise RuntimeError(
-      f"Failed to get port name from server after {max_attempts} attempts!"
+      f"Failed to lookup port name for server '{server_name}' after {max_attempts} attempts!"
     )
+  
+  @staticmethod
+  def __get_current_wait_time(data: ConnectAttemptData, attempts: int):
+    return min(
+      data.max_wait_ms, data.initial_wait_ms + attempts * data.wait_increment_ms
+    )
+  
+  def __sleep_ms(milliseconds: int): sleep(milliseconds / 1000)
