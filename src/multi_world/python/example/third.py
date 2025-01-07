@@ -9,9 +9,6 @@ if rank == 0:
 
   first_comm = ServerManager.accept()
   transfer_object = {'name': '0|Third  to 1|First', 'value': 3011}
-
-  # Send data to 1|First, mapped as rank 0 (dest=0) in first_comm, 
-  # since it's the only process in this communicator
   first_comm.send(transfer_object, 0)
   
   print('(Send) 0|Third  -> 1|First: ', end=' ')
