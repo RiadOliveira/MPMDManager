@@ -31,7 +31,7 @@ inline void Client_Disconnect_server(
 ) {
   ConnectionsData* servers = (ConnectionsData*)&manager->servers;
   Connection* serverFound = findConnectionOrError(servers, id, idType);
-  finalizeConnection(serverFound);
+  finalizeConnection(servers, serverFound);
 }
 
 inline void Client_Disconnect_servers(const ClientManager* manager) {
@@ -43,15 +43,17 @@ const MPI_Comm* Client_Connect(
   const ClientManager* manager, const char* serverName,
   const ConnectAttemptData* attemptData
 ) {
+  ConnectionsData* servers = (ConnectionsData*)&manager->servers;
+  validateConnectionAddition(servers, serverName);
+
   char portName[MPI_MAX_PORT_NAME];
   attemptServerPortNameLookup(portName, serverName, attemptData);
 
   MPI_Comm serverComm;
   MPI_Comm_connect(portName, MPI_INFO_NULL, 0, manager->comm, &serverComm);
 
-  ConnectionsData* servers = (ConnectionsData*)&manager->servers;
-  Connection* server = addConnection(servers, serverName, &serverComm);
-  return &server->comm;
+  Connection* serverAdded = addConnection(servers, serverName, &serverComm);
+  return &serverAdded->comm;
 }
 
 inline const MPI_Comm* Client_Retrieve_Server_comm(
@@ -84,8 +86,8 @@ void attemptServerPortNameLookup(
   }
 
   exitWithError(
-    "Failed to lookup port name for server '", serverName, "' after ",
-    maxAttempts, " attempts!"
+    "Failed to lookup port name for server '%s' after %d attempts!", serverName,
+    maxAttempts
   );
 }
 

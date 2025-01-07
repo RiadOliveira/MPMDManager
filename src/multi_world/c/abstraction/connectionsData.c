@@ -23,31 +23,37 @@ inline void initConnections(ConnectionsData* data, uint maxSize) {
   }
 }
 
-inline void finalizeConnection(Connection* connection) {
+inline void finalizeConnection(ConnectionsData* data, Connection* connection) {
   MPI_Comm* comm = &connection->comm;
   if(*comm != MPI_COMM_NULL) MPI_Comm_disconnect(comm);
   connection->active = false;
+
+  data->size--;
 }
 
 inline void finalizeConnections(ConnectionsData* data) {
   const uint maxSize = data->maxSize;
   Connection* connections = data->connections;
 
-  for(uint ind = 0; ind < maxSize; ind++) finalizeConnection(&connections[ind]);
-  data->size = 0;
+  for(uint ind = 0; ind < maxSize; ind++)
+    finalizeConnection(data, &connections[ind]);
 }
 
-Connection* addConnection(
-  ConnectionsData* data, const char* name, MPI_Comm* comm
+inline void validateConnectionAddition(
+  ConnectionsData* data, const char* name
 ) {
   const bool maxSizeReached = data->size >= data->maxSize;
   if(maxSizeReached) exitWithError("Connections max size reached!");
 
   const bool existsByName = findConnectionByName(data, name) != NULL;
   if(existsByName) {
-    exitWithError("A connection named '", name, "' already exists!");
+    exitWithError("A connection named '%s' already exists!", name);
   }
+}
 
+Connection* addConnection(
+  ConnectionsData* data, const char* name, MPI_Comm* comm
+) {
   uint ind;
   Connection* newConnection = getNextUnactiveConnection(data, &ind);
   setNewConnectionName(newConnection, name, ind);

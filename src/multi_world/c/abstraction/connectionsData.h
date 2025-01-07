@@ -16,9 +16,10 @@ typedef struct {
 } ConnectionsData;
 
 void initConnections(ConnectionsData* data, uint maxSize);
-void finalizeConnection(Connection* connection);
+void finalizeConnection(ConnectionsData* data, Connection* connection);
 void finalizeConnections(ConnectionsData* data);
 
+void validateConnectionAddition(ConnectionsData* data, const char* name);
 Connection* addConnection(
   ConnectionsData* data, const char* name, MPI_Comm* comm
 );

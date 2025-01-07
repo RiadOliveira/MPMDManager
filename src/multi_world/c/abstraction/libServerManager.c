@@ -30,7 +30,7 @@ inline void Server_Disconnect_client(
 ) {
   ConnectionsData* clients = (ConnectionsData*)&manager->clients;
   Connection* clientFound = findConnectionOrError(clients, id, idType);
-  finalizeConnection(clientFound);
+  finalizeConnection(clients, clientFound);
 }
 
 inline void Server_Disconnect_clients(const ServerManager* manager) {
@@ -55,13 +55,15 @@ inline void Server_Close(const ServerManager* manager) {
 const MPI_Comm* Server_Accept(
   const ServerManager* manager, const char* clientName
 ) {
+  ConnectionsData* clients = (ConnectionsData*)&manager->clients;
+  validateConnectionAddition(clients, clientName);
+
   MPI_Comm clientComm;
   char* portName = (char*)manager->portName;
   MPI_Comm_accept(portName, MPI_INFO_NULL, 0, manager->comm, &clientComm);
 
-  ConnectionsData* clients = (ConnectionsData*)&manager->clients;
-  Connection* client = addConnection(clients, clientName, &clientComm);
-  return &client->comm;
+  Connection* clientAdded = addConnection(clients, clientName, &clientComm);
+  return &clientAdded->comm;
 }
 
 inline const MPI_Comm* Server_Retrieve_Client_comm(
