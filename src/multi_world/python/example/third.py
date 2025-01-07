@@ -9,7 +9,7 @@ if rank == 0:
 
   first_comm = ServerManager.accept()
   transfer_object = {'name': '0|Third  to 1|First', 'value': 3011}
-  first_comm.send(transfer_object, 0)
+  first_comm.send(transfer_object, dest=0)
   
   print('(Send) 0|Third  -> 1|First: ', end=' ')
   print(transfer_object)
