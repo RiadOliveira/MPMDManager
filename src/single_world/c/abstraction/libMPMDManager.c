@@ -15,12 +15,12 @@ inline void Manager_Finalize(const MPMDManager* manager) {
 
   for(uint ind = 0; ind < connectionsSize; ind++) {
     MPI_Comm* connectionComm = &connections[ind].comm;
-    if(connectionComm != NULL) MPI_Comm_disconnect(connectionComm);
+    if(*connectionComm != MPI_COMM_NULL) MPI_Comm_disconnect(connectionComm);
   }
   free(manager->connections);
 
   MPI_Comm* managerComm = (MPI_Comm*)&manager->comm;
-  if(managerComm != NULL) MPI_Comm_disconnect(managerComm);
+  if(*managerComm != MPI_COMM_NULL) MPI_Comm_disconnect(managerComm);
 
   free((MPMDManager*)manager);
 }

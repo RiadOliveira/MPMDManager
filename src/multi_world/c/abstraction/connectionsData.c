@@ -25,9 +25,10 @@ inline void finalizeConnections(ConnectionsData* data) {
 
   for(uint ind = 0; ind < maxSize; ind++) {
     Connection* current = &connections[ind];
-    MPI_Comm* comm = &current->comm;
 
-    if(comm != NULL && current->active) MPI_Comm_disconnect(comm);
+    MPI_Comm* comm = &current->comm;
+    if(*comm != MPI_COMM_NULL) MPI_Comm_disconnect(comm);
+    current->active = false;
   }
   data->size = 0;
 }

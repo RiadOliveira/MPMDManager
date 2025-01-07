@@ -19,7 +19,7 @@ inline void Server_Finalize(const ServerManager* manager) {
   free(manager->clients.connections);
 
   MPI_Comm* managerComm = (MPI_Comm*)&manager->comm;
-  if(managerComm != NULL) MPI_Comm_disconnect(managerComm);
+  if(*managerComm != MPI_COMM_NULL) MPI_Comm_disconnect(managerComm);
 
   Server_Close(manager);
   free((ServerManager*)manager);

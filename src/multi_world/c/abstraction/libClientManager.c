@@ -21,7 +21,7 @@ inline void Client_Finalize(const ClientManager* manager) {
   free(manager->servers.connections);
 
   MPI_Comm* managerComm = (MPI_Comm*)&manager->comm;
-  if(managerComm != NULL) MPI_Comm_disconnect(managerComm);
+  if(*managerComm != MPI_COMM_NULL) MPI_Comm_disconnect(managerComm);
 
   free((ClientManager*)manager);
 }
