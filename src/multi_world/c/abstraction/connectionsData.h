@@ -16,6 +16,7 @@ typedef struct {
 } ConnectionsData;
 
 void initConnections(ConnectionsData* data, uint maxSize);
+void finalizeConnection(Connection* connection);
 void finalizeConnections(ConnectionsData* data);
 
 Connection* addConnection(

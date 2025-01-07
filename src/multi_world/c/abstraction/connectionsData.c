@@ -16,20 +16,24 @@ inline void initConnections(ConnectionsData* data, uint maxSize) {
   data->connections = malloc(sizeof(Connection) * parsedMax);
 
   Connection* connections = data->connections;
-  for(uint ind = 0; ind < parsedMax; ind++) connections[ind].active = false;
+  for(uint ind = 0; ind < parsedMax; ind++) {
+    Connection* current = &connections[ind];
+    current->comm = MPI_COMM_NULL;
+    current->active = false;
+  }
+}
+
+inline void finalizeConnection(Connection* connection) {
+  MPI_Comm* comm = &connection->comm;
+  if(*comm != MPI_COMM_NULL) MPI_Comm_disconnect(comm);
+  connection->active = false;
 }
 
 inline void finalizeConnections(ConnectionsData* data) {
   const uint maxSize = data->maxSize;
   Connection* connections = data->connections;
 
-  for(uint ind = 0; ind < maxSize; ind++) {
-    Connection* current = &connections[ind];
-
-    MPI_Comm* comm = &current->comm;
-    if(*comm != MPI_COMM_NULL) MPI_Comm_disconnect(comm);
-    current->active = false;
-  }
+  for(uint ind = 0; ind < maxSize; ind++) finalizeConnection(&connections[ind]);
   data->size = 0;
 }
 
@@ -112,7 +116,6 @@ inline Connection* findConnectionByName(
 
   for(uint ind = 0; ind < maxSize; ind++) {
     Connection* current = &connections[ind];
-
     if(!current->active) continue;
     if(streql(name, current->name)) return current;
   }

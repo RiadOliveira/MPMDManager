@@ -24,6 +24,10 @@ typedef struct {
 
 const ClientManager* Client_Init(uint maxServers);
 void Client_Finalize(const ClientManager* manager);
+
+void Client_Disconnect_server(
+  const ClientManager* manager, ConnectionId id, IdType idType
+);
 void Client_Disconnect_servers(const ClientManager* manager);
 
 const MPI_Comm* Client_Connect(

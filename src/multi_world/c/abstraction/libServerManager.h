@@ -18,6 +18,10 @@ const ServerManager* Server_Init(
   char** argv, const char* serverName, uint maxClients
 );
 void Server_Finalize(const ServerManager* manager);
+
+void Server_Disconnect_client(
+  const ServerManager* manager, ConnectionId id, IdType idType
+);
 void Server_Disconnect_clients(const ServerManager* manager);
 
 void Server_Open(const ServerManager* manager);

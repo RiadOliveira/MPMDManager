@@ -26,6 +26,14 @@ inline void Client_Finalize(const ClientManager* manager) {
   free((ClientManager*)manager);
 }
 
+inline void Client_Disconnect_server(
+  const ClientManager* manager, ConnectionId id, IdType idType
+) {
+  ConnectionsData* servers = (ConnectionsData*)&manager->servers;
+  Connection* serverFound = findConnectionOrError(servers, id, idType);
+  finalizeConnection(serverFound);
+}
+
 inline void Client_Disconnect_servers(const ClientManager* manager) {
   ConnectionsData* servers = (ConnectionsData*)&manager->servers;
   finalizeConnections(servers);
