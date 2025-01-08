@@ -13,6 +13,11 @@ Contents
      - [Languages](#languages)
      - [Libraries](#libraries)
    - [:gear: Features](#features)
+     - [Single World](#features-single)
+     - [Multi World](#features-multi)
+       - [Client](#features-multi-client)
+       - [Server](#features-multi-server)
+   - [:blue_book: API Reference](#reference)
    - [:memo: License](#license)
    - [👨‍💻 Authors](#authors)
 </br>
@@ -41,6 +46,43 @@ The abstractions are available in C, using the original MPI library, and in Pyth
   - ![mpi4py](https://mpi4py.readthedocs.io/en/stable/)
 
 <h2 id="features">:gear: Features</h2>
+
+- <h3 id="features-single">Single World</h3>
+
+  - Local program information retrieval:
+    - Program name
+    - Communicator
+    - Size
+  - Local process information retrieval:
+    - Rank
+  - Remote program information retrieval using its name or index:
+    - Communicator
+    - Size
+
+- <h3 id="features-multi">Multi World</h3>
+
+  - <h4 id="features-multi-client">Client</h4>
+
+    - Request connection to a server using its name
+    - Customize connection attempts by specifying:
+      - Max Attempts
+      - Initial Wait Time (in milliseconds)
+      - Wait Increment Time (in milliseconds, added to the wait time for each attempt)
+      - Max Wait Time (in milliseconds)
+    - Retrieve communicators of previously connected servers by their names or indexes.
+    - Disconnect from a specific server by its name or index.
+    - Disconnect from all previously connected servers.
+
+  - <h4 id="features-multi-server">Server</h4>
+
+    - Open and close the server.
+    - Approve client connection, with the option to assign a name to the client.
+    - Retrieve communicators of previously connected clients by their names or indexes.
+    - Disconnect a specific client by its name or index.
+    - Disconnect all previously connected clients.
+    - Retrieve the local server name.
+
+<h2 id="reference">:blue_book: API Reference</h2>
 
 <h2 id="license">:memo: License</h2>
 This project is MIT Licensed. See <a href="https://github.com/RiadOliveira/MPMDManager/blob/main/LICENSE">LICENSE</a> file for more details.
