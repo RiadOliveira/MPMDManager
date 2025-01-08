@@ -3,6 +3,7 @@ from time import sleep
 
 from .manager import Manager
 from .connection import Connection
+from .error import exit_with_error
 from .connect_attempt_data import ConnectAttemptData
 
 class ClientManager(Manager):
@@ -57,7 +58,7 @@ class ClientManager(Manager):
         wait_time_ms = ClientManager.__get_current_wait_time(data, attempts)
         ClientManager.__sleep_ms(wait_time_ms)
 
-    raise RuntimeError(
+    exit_with_error(
       f"Failed to lookup port name for server '{server_name}' after {max_attempts} attempts!"
     )
   

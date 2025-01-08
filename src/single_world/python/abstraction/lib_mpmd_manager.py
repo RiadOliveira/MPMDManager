@@ -1,6 +1,7 @@
 from mpi4py import MPI
 
 from .connection import Connection
+from .error import exit_with_error
 from .auxiliar_data import AuxiliarConnection
 from .filename_handler import get_filename
 
@@ -119,10 +120,10 @@ class MPMDManager:
   @staticmethod
   def __find_connection_or_error(identifier: str | int):
     invalid_identifier = not isinstance(identifier, (str, int))
-    if invalid_identifier: raise Exception("Invalid connection id!")
+    if invalid_identifier: exit_with_error("Invalid connection id!")
 
     connection_found = MPMDManager.__find_connection(identifier)
-    if connection_found is None: raise Exception("Connection not found!")
+    if connection_found is None: exit_with_error("Connection not found!")
 
     return connection_found
 

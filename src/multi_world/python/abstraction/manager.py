@@ -1,6 +1,7 @@
 from abc import ABCMeta
 
 from .connection import Connection
+from .error import exit_with_error
 
 class Manager(ABCMeta):
   _connections: list[Connection] = []
@@ -11,25 +12,25 @@ class Manager(ABCMeta):
 
     connection_found = Manager.__find_connection_by_name(name)
     if connection_found != None:
-      raise Exception(f"A connection named '{name}' already exists!")
+      exit_with_error(f"A connection named '{name}' already exists!")
 
   @staticmethod
   def _find_connection_or_error(connection_id: str | int):
     invalid_id = not isinstance(connection_id, (str, int))
-    if invalid_id: raise Exception("Invalid connection id!")
+    if invalid_id: exit_with_error("Invalid connection id!")
 
     connection_found = Manager.__find_connection(connection_id)
-    if connection_found is None: raise Exception("Connection not found!")
+    if connection_found is None: exit_with_error("Connection not found!")
 
     return connection_found
 
   @staticmethod
   def _find_connection_ind_or_error(connection_id: str | int):
     invalid_id = not isinstance(connection_id, (str, int))
-    if invalid_id: raise Exception("Invalid connection id!")
+    if invalid_id: exit_with_error("Invalid connection id!")
 
     ind = Manager.__find_connection_ind(connection_id)
-    if ind is None: raise Exception("Connection not found!")
+    if ind is None: exit_with_error("Connection not found!")
 
     return ind
 
