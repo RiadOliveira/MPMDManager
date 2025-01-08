@@ -55,7 +55,7 @@ class ServerManager(Manager):
   def disconnect_clients(): Manager._connections.clear()
 
   @staticmethod
-  def name(): return ServerManager.__name
+  def local_name(): return ServerManager.__name
 
   @staticmethod
   def __parse_name(name: str | None):
