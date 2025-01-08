@@ -10,7 +10,6 @@ inline const ClientManager* Client_Init(uint maxServers) {
   ClientManager* manager = malloc(sizeof(ClientManager));
 
   MPI_Comm_dup(MPI_COMM_SELF, &manager->comm);
-  MPI_Comm_set_errhandler(MPI_COMM_WORLD, MPI_ERRORS_RETURN);
   initConnections(&manager->servers, maxServers);
 
   return manager;
