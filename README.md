@@ -84,6 +84,60 @@ The abstractions are available in C, using the original MPI library, and in Pyth
 
 <h2 id="reference">:blue_book: API Reference</h2>
 
+<p>
+This section provides a comprehensive overview of all functions offered by the abstractions, detailing their names, syntax, and descriptions. The documentation includes both <i>Single World</i> and <i>Multi World</i> abstractions, with the latter featuring a clear distinction between Client and Server functionalities. All functions are documented for both supported languages, C and Python, ensuring compatibility and clarity for developers across diverse platforms.
+
+In C, the functionalities are implemented as standalone functions with specific naming conventions for clarity. For <i>Single World</i>, all functions are prefixed with ```Manager_```. For <i>Multi World</i>, functions are categorized into Client and Server, using the prefixes ```Client_``` and ```Server_```, respectively.
+
+In Python, the approach differs slightly by using distinct classes to encapsulate the functionality. The ```MPMDManager``` class represents the <i>Single World</i> abstraction, while the <i>Multi World</i> abstraction is divided into two separate classes: ```ClientManager``` and ```ServerManager```. Each class employs static methods defined with the ```@staticmethod``` decorator, allowing the functions to be called directly from the class without requiring object instantiation.
+</p>
+
+- <h3 id="reference-single">Single World</h3>
+
+  - **Init**:
+    - Description: Initializes the manager by setting its communicator and connections. This routine performs communication among all processes, so it must be called by all of them at the start of their execution, immediately after ```MPI_Init()```.
+    - Syntax:
+      - C: ```const MPMDManager* Manager_Init(char** argv)```
+      - Python: ```MPMDManager.init() -> None```
+    - Note: In C, the function returns a pointer to the ```Manager```, which is required by other functions.
+  - **Finalize**:
+    - Description: Finalizes the manager, freeing all allocated resources and terminating established connections.
+    - Syntax:
+      - C: ```void Manager_Finalize(const MPMDManager* manager)```
+      - Python: ```MPMDManager.finalize() -> None```
+  - **Local Name**:
+    - Description: Returns the name of the local program.
+    - Syntax:
+      - C: ```const char* Manager_Local_name(const MPMDManager* manager)```
+      - Python: ```MPMDManager.local_name() -> str```
+  - **Local Comm**:
+    - Description: Returns the communicator of the local program.
+    - Syntax:
+      - C: ```const MPI_Comm* Manager_Local_comm(const MPMDManager* manager)```
+      - Python: ```MPMDManager.local_comm() -> MPI.Intracomm```
+  - **Local Rank**:
+    - Description: Returns the rank of the process within the context of the local program.
+    - Syntax:
+      - C: ```int Manager_Local_rank(const MPMDManager* manager)```
+      - Python: ```MPMDManager.local_rank() -> int```
+  - **Local Size**:
+    - Description: Returns the size of the local program.
+    - Syntax:
+      - C: ```unsigned int Manager_Local_size(const MPMDManager* manager)```
+      - Python: ```MPMDManager.local_size() -> int```
+  - **Comm To**:
+    - Description: Returns the communicator of a remote program identified by the provided ID, which can be its name or index.
+    - Syntax:
+      - C: ```const MPI_Comm* Manager_Comm_to(const MPMDManager* manager, ConnectionId id, IdType idType)```
+      - Python: ```MPMDManager.comm_to(identifier: str | int) -> MPI.Comm```
+    - Note: If the program with the specified ID is not found, an error message will be displayed, and the MPI environment will terminate using ```MPI_Abort()```.
+  - **Size Of**:
+    - Description: Returns the size of a remote program identified by the provided ID, which can be its name or index.
+    - Syntax:
+      - C: ```unsigned int Manager_Size_of(const MPMDManager* manager, ConnectionId id, IdType idType)```
+      - Python: ```MPMDManager.size_of(identifier: str | int) -> int```
+    - Note: If the program with the specified ID is not found, an error message will be displayed, and the MPI environment will terminate using ```MPI_Abort()```.
+
 <h2 id="license">:memo: License</h2>
 This project is MIT Licensed. See <a href="https://github.com/RiadOliveira/MPMDManager/blob/main/LICENSE">LICENSE</a> file for more details.
 
