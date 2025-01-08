@@ -23,6 +23,9 @@ class ServerManager(Manager):
     ServerManager.close()
 
   @staticmethod
+  def local_name(): return ServerManager.__name
+
+  @staticmethod
   def open():
     ServerManager.__port_name = MPI.Open_port()
     MPI.Publish_name(ServerManager.__name, ServerManager.__port_name)
@@ -53,9 +56,6 @@ class ServerManager(Manager):
 
   @staticmethod
   def disconnect_clients(): Manager._connections.clear()
-
-  @staticmethod
-  def local_name(): return ServerManager.__name
 
   @staticmethod
   def __parse_name(name: str | None):

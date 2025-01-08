@@ -25,6 +25,10 @@ inline void Server_Finalize(const ServerManager* manager) {
   free((ServerManager*)manager);
 }
 
+inline const char* Server_Local_name(const ServerManager* manager) {
+  return manager->name;
+}
+
 inline void Server_Open(const ServerManager* manager) {
   char* portName = (char*)manager->portName;
 
@@ -71,10 +75,6 @@ inline void Server_Disconnect_client(
 inline void Server_Disconnect_clients(const ServerManager* manager) {
   ConnectionsData* clients = (ConnectionsData*)&manager->clients;
   finalizeConnections(clients);
-}
-
-inline const char* Server_Local_name(const ServerManager* manager) {
-  return manager->name;
 }
 
 void setServerName(
