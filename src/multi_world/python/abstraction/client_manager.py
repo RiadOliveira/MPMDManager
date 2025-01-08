@@ -20,14 +20,6 @@ class ClientManager(Manager):
     if manager_comm != MPI.COMM_NULL: manager_comm.Disconnect()
 
   @staticmethod
-  def disconnect_server(server_id: str | int):
-    ind_found = Manager._find_connection_ind_or_error(server_id)
-    Manager._connections.pop(ind_found)
-
-  @staticmethod
-  def disconnect_servers(): Manager._connections.clear()
-
-  @staticmethod
   def connect(server_name: str, attemptData = ConnectAttemptData()):
     Manager._validate_connection_addition(server_name)
 
@@ -43,6 +35,14 @@ class ClientManager(Manager):
   @staticmethod
   def retrieve_server_comm(server_id: str | int):
     return Manager._find_connection_or_error(server_id).comm
+  
+  @staticmethod
+  def disconnect_server(server_id: str | int):
+    ind_found = Manager._find_connection_ind_or_error(server_id)
+    Manager._connections.pop(ind_found)
+
+  @staticmethod
+  def disconnect_servers(): Manager._connections.clear()
 
   @staticmethod
   def __attempt_server_port_name_lookup(

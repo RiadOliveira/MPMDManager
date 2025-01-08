@@ -23,14 +23,6 @@ class ServerManager(Manager):
     ServerManager.close()
 
   @staticmethod
-  def disconnect_client(client_id: str | int):
-    ind_found = Manager._find_connection_ind_or_error(client_id)
-    Manager._connections.pop(ind_found)
-
-  @staticmethod
-  def disconnect_clients(): Manager._connections.clear()
-
-  @staticmethod
   def open():
     ServerManager.__port_name = MPI.Open_port()
     MPI.Publish_name(ServerManager.__name, ServerManager.__port_name)
@@ -53,6 +45,14 @@ class ServerManager(Manager):
   @staticmethod
   def retrieve_client_comm(client_id: str | int):
     return Manager._find_connection_or_error(client_id).comm
+  
+  @staticmethod
+  def disconnect_client(client_id: str | int):
+    ind_found = Manager._find_connection_ind_or_error(client_id)
+    Manager._connections.pop(ind_found)
+
+  @staticmethod
+  def disconnect_clients(): Manager._connections.clear()
 
   @staticmethod
   def name(): return ServerManager.__name

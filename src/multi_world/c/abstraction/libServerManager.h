@@ -19,11 +19,6 @@ const ServerManager* Server_Init(
 );
 void Server_Finalize(const ServerManager* manager);
 
-void Server_Disconnect_client(
-  const ServerManager* manager, ConnectionId id, IdType idType
-);
-void Server_Disconnect_clients(const ServerManager* manager);
-
 void Server_Open(const ServerManager* manager);
 void Server_Close(const ServerManager* manager);
 
@@ -33,6 +28,11 @@ const MPI_Comm* Server_Accept(
 const MPI_Comm* Server_Retrieve_Client_comm(
   const ServerManager* manager, ConnectionId id, IdType idType
 );
+
+void Server_Disconnect_client(
+  const ServerManager* manager, ConnectionId id, IdType idType
+);
+void Server_Disconnect_clients(const ServerManager* manager);
 
 const char* Server_Local_name(const ServerManager* manager);
 

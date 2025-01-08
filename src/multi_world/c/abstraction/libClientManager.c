@@ -26,19 +26,6 @@ inline void Client_Finalize(const ClientManager* manager) {
   free((ClientManager*)manager);
 }
 
-inline void Client_Disconnect_server(
-  const ClientManager* manager, ConnectionId id, IdType idType
-) {
-  ConnectionsData* servers = (ConnectionsData*)&manager->servers;
-  Connection* serverFound = findConnectionOrError(servers, id, idType);
-  finalizeConnection(servers, serverFound);
-}
-
-inline void Client_Disconnect_servers(const ClientManager* manager) {
-  ConnectionsData* servers = (ConnectionsData*)&manager->servers;
-  finalizeConnections(servers);
-}
-
 const MPI_Comm* Client_Connect(
   const ClientManager* manager, const char* serverName,
   const ConnectAttemptData* attemptData
@@ -61,6 +48,19 @@ inline const MPI_Comm* Client_Retrieve_Server_comm(
 ) {
   ConnectionsData* servers = (ConnectionsData*)&manager->servers;
   return &findConnectionOrError(servers, id, idType)->comm;
+}
+
+inline void Client_Disconnect_server(
+  const ClientManager* manager, ConnectionId id, IdType idType
+) {
+  ConnectionsData* servers = (ConnectionsData*)&manager->servers;
+  Connection* serverFound = findConnectionOrError(servers, id, idType);
+  finalizeConnection(servers, serverFound);
+}
+
+inline void Client_Disconnect_servers(const ClientManager* manager) {
+  ConnectionsData* servers = (ConnectionsData*)&manager->servers;
+  finalizeConnections(servers);
 }
 
 void attemptServerPortNameLookup(
