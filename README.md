@@ -18,6 +18,10 @@ Contents
        - [Client](#features-multi-client)
        - [Server](#features-multi-server)
    - [:blue_book: API Reference](#reference)
+     - [Single World](#reference-single)
+     - [Multi World](#reference-multi)
+       - [Client](#reference-multi-client)
+       - [Server](#reference-multi-server) 
    - [:memo: License](#license)
    - [👨‍💻 Authors](#authors)
 </br>
@@ -137,6 +141,95 @@ In Python, the approach differs slightly by using distinct classes to encapsulat
       - C: ```unsigned int Manager_Size_of(const MPMDManager* manager, ConnectionId id, IdType idType)```
       - Python: ```MPMDManager.size_of(identifier: str | int) -> int```
     - Note: If the program with the specified ID is not found, an error message will be displayed, and the MPI environment will terminate using ```MPI_Abort()```.
+
+- <h3 id="reference-multi">Multi World</h3>
+
+  - <h4 id="reference-multi-client">Client</h4>
+
+    - **Init**:
+      - Description: Initializes the manager by setting its communicator and variables. This routine should only be called by processes that specifically intend to act as clients to servers, not by all processes in the program.
+      - Syntax:
+        - C: ```const ClientManager* Client_Init(uint maxServers)```
+        - Python: ```ClientManager.init() -> None```
+      - Note: In C, the function returns a pointer to the ```ClientManager```, which is required by other functions. Additionally, the maximum number of servers that can connect must be specified.
+    - **Finalize**:
+      - Description: Finalizes the manager, freeing all allocated resources and terminating established connections.
+      - Syntax:
+        - C: ```void Client_Finalize(const ClientManager* manager)```
+        - Python: ```ClientManager.finalize() -> None```
+    - **Connect**:
+      - Description: Attempts to establish a connection with an open server that has the specified name. If successful, it returns the server's ```Intercommunicator```. Otherwise, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```. If the connection attempt fails, it retries after a delay, based on the attributes of the provided ConnectAttemptData structure/object, which includes: maxAttempts, initialWaitMs, waitIncrementMs e maxWaitMs. Default values are 10 maximum attempts, 500 ms initial wait, 500 ms increment per attempt, and 5000 ms maximum wait.
+      - Syntax:
+        - C: ```const MPI_Comm* Client_Connect(const ClientManager* manager, const char* serverName, const ConnectAttemptData* attemptData)```
+        - Python: ```ClientManager.connect(server_name: str, attemptData = ConnectAttemptData()) -> MPI.Intercomm```
+    - **Retrieve Server Comm**:
+      - Description: Returns the communicator of a server identified by the provided ID, which can be its name or index.
+      - Syntax:
+        - C: ```const MPI_Comm* Client_Retrieve_Server_comm(const ClientManager* manager, ConnectionId id, IdType idType)```
+        - Python: ```ClientManager.retrieve_server_comm(server_id: str | int) -> MPI.Intercomm```
+        - Note: If the server with the specified ID is not found, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```.
+    - **Disconnect Server**:
+      - Description: Disconnects and cleans up resources for the server identified by the provided ID, which can be its name or index.
+      - Syntax:
+        - C: ```void Client_Disconnect_server(const ClientManager* manager, ConnectionId id, IdType idType)```
+        - Python: ```ClientManager.disconnect_server(server_id: str | int) -> None```
+        - Note: If the server with the specified ID is not found, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```.
+    - **Disconnect Servers**:
+      - Description: Disconnects and cleans up resources for all previously connected servers.
+      - Syntax:
+        - C: ```void Client_Disconnect_servers(const ClientManager* manager)```
+        - Python: ```ClientManager.disconnect_servers() -> None```
+
+  - <h4 id="reference-multi-server">Server</h4>
+
+    - **Init**:
+      - Description: Initializes the manager by setting its communicator and variables. If the server name is null, it will be automatically generated using the file name combined with the rank of the process that called the method, in that order. This routine should only be called by processes intending to act as servers and connect with clients, not by all processes in the program.
+      - Syntax:
+        - C: ```const ServerManager* Server_Init(char** argv, const char* serverName, uint maxClients)```
+        - Python: ```ServerManager.init(server_name: str | None = None) -> None```
+      - Note: In C, the function returns a pointer to the ```ServerManager```, which is required by other functions. Additionally, the maximum number of clients that can connect must be specified.
+    - **Finalize**:
+      - Description: Finalizes the manager, freeing all allocated resources and terminating established connections.
+      - Syntax:
+        - C: ```void Server_Finalize(const ServerManager* manager)```
+        - Python: ```ServerManager.finalize() -> None```
+    - **Local Name**:
+      - Description: Returns the name of the local server.
+      - Syntax:
+        - C: ```const char* Server_Local_name(const ServerManager* manager)```
+        - Python: ```ServerManager.local_name() -> str```
+    - **Open**:
+      - Description: Opens the server for client connection requests by calling ```MPI_Open_port()``` and ```MPI_Publish_name()``` with the name provided during initialization.
+      - Syntax:
+        - C: ```void Server_Open(const ServerManager* manager)```
+        - Python: ```ServerManager.open() -> None```
+    - **Close**:
+      - Description: Closes the server by calling ```MPI_Unpublish_name()``` and ```MPI_Close_port()```. This routine is also called during the **Finalize** operation.
+      - Syntax:
+        - C: ```void Server_Close(const ServerManager* manager)```
+        - Python: ```ServerManager.finalize() -> None```
+    - **Accept**:
+      - Description: Waits for a client connection request and establishes a connection, returning the corresponding ```Intercommunicator```. Optionally, a name can be assigned to the connected client, which can be used as its identifier in other functions.
+      - Syntax:
+        - C: ```const MPI_Comm* Server_Accept(const ServerManager* manager, const char* clientName)```
+        - Python: ```ServerManager.accept(client_id: str | None = None) -> Intercomm```
+    - **Retrieve Client Comm**:
+      - Description: Returns the communicator of a client identified by the provided ID, which can be its name or index.
+      - Syntax:
+        - C: ```const MPI_Comm* Server_Retrieve_Client_comm(const ServerManager* manager, ConnectionId id, IdType idType)```
+        - Python: ```ServerManager.retrieve_client_comm(client_id: str | int) -> MPI.Intercomm```
+        - Note: If the client with the specified ID is not found, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```.
+    - **Disconnect Client**:
+      - Description: Disconnects and cleans up resources for the client identified by the provided ID, which can be its name or index.
+      - Syntax:
+        - C: ```void Server_Disconnect_client(const ServerManager* manager, ConnectionId id, IdType idType)```
+        - Python: ```ServerManager.disconnect_client(client_id: str | int) -> None```
+        - Note: If the client with the specified ID is not found, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```.
+    - **Disconnect Clients**:
+      - Description: Disconnects and cleans up resources for all previously connected clients.
+      - Syntax:
+        - C: ```void Server_Disconnect_clients(const ServerManager* manager)```
+        - Python: ```ServerManager.disconnect_clients() -> None```
 
 <h2 id="license">:memo: License</h2>
 This project is MIT Licensed. See <a href="https://github.com/RiadOliveira/MPMDManager/blob/main/LICENSE">LICENSE</a> file for more details.
