@@ -235,7 +235,13 @@ This project is MIT Licensed. See <a href="https://github.com/RiadOliveira/MPMDM
     <td align="center">
       <a href="https://github.com/RiadOliveira">
         <img src="https://avatars.githubusercontent.com/u/69125013?v=4" width="100px;" alt="Ríad Oliveira"/>
-        <br /><sub><b>Ríad Oliveira</b></sub>
+        <br/><sub><b>Ríad Oliveira</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/paulohenriquels">
+        <img src="https://avatars.githubusercontent.com/u/102553073?v=4" width="100px;" alt="Paulo Henrique"/>
+        <br/><sub><b>Paulo Henrique</b></sub>
       </a>
     </td>
   </tr>
