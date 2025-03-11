@@ -4,12 +4,10 @@
   An abstraction, built on top of the MPI library, that is designed to simplify the development of parallel programs in the MPMD context by providing functions to facilitate the identification, communication, and coordination of multiple parallel programs.
 </p>
 
-![image](https://img.shields.io/github/license/RiadOliveira/MPMDManager)
-
 Contents
 =================
    - [💡 Proposal](#proposal)
-   - [🛠 Technologies](#technologies)
+   - [🛠️ Technologies](#technologies)
      - [Languages](#languages)
      - [Libraries](#libraries)
    - [:gear: Features](#features)
@@ -36,7 +34,7 @@ Contents
 The abstractions are available in C, using the original MPI library, and in Python, through the <i>mpi4py</i> package. Both versions retain the functionality and capabilities of the <i>Single World</i> and <i>Multi World</i> abstractions, offering suitable alternatives for different needs and levels of expertise.
 </p>
 
-<h2 id="technologies">🛠 Technologies</h2>
+<h2 id="technologies">🛠️ Technologies</h2>
 
 - <h3 id="languages">Languages</h3>
 
