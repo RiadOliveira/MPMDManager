@@ -1,246 +1,362 @@
 <h1 align="center">MPMDManager</h1>
 
 <p align="center">
-  An abstraction, built on top of the MPI library, that is designed to simplify the development of parallel programs in the MPMD context by providing functions to facilitate the identification, communication, and coordination of multiple parallel programs.
+  An abstraction layer built on top of MPI that simplifies development of parallel programs in MPMD (Multiple Program Multiple Data) environments by providing intuitive functions for program identification, communication, and coordination.
 </p>
+
+![image](https://img.shields.io/github/license/RiadOliveira/MPMDManager)
 
 Contents
 =================
-   - [💡 Proposal](#proposal)
-   - [🛠️ Technologies](#technologies)
-     - [Languages](#languages)
-     - [Libraries](#libraries)
-   - [:gear: Features](#features)
-     - [Single World](#features-single)
-     - [Multi World (Client)](#features-multi-client)
-     - [Multi World (Server)](#features-multi-server)
-   - [:blue_book: API Reference](#reference)
-     - [Single World](#reference-single)
-     - [Multi World (Client)](#reference-multi-client)
-     - [Multi World (Server)](#reference-multi-server)
-   - [:memo: License](#license)
-   - [👨‍💻 Authors](#authors)
-</br>
+<!--ts-->
+* [💡 Proposal](#proposal)
+* [🛠️ Technologies](#technologies)
+* [🚀 Getting Started](#getting-started)
+  * [Prerequisites](#prerequisites)
+  * [Installation](#installation)
+  * [Project Structure](#structure)
+  * [Running Examples](#running-examples)
+* [⚙️ Features](#features)
+  * [Single World](#features-single)
+  * [Multi World (Client)](#features-multi-client)
+  * [Multi World (Server)](#features-multi-server)
+* [📚 API Reference](#reference)
+  * [Single World](#reference-single)
+  * [Multi World (Client)](#reference-multi-client)
+  * [Multi World (Server)](#reference-multi-server)
+* [📜 Certification](#certification)
+* [📝 License](#license)
+* [👨‍💻 Authors](#authors)
+<!--te-->
+<br/>
 
 <h2 id="proposal">💡 Proposal</h2>
-<p>
-  MPMDManager, as the name suggests, is a software tool that provides a manager for MPMD environments, simplifying the identification and connection procedures between parallel programs. The project introduces two distinct abstractions:
-</p>
+MPMDManager provides two powerful abstractions for parallel programming:
 
-- **Single World**: Designed for cases where parallel programs are executed in MPI's MPMD mode, meaning all programs are launched with a single command line, separated by colons (:). In this context, all program processes share the same *MPI_COMM_WORLD*, which is why this abstraction is called *Single World*.
-- **Multi World**: Intended for cases where parallel programs are executed independently, each with its own command line. In this scenario, each program has its own *MPI_COMM_WORLD* that encompasses only its own processes, hence the name *Multi World*. Communication in this abstraction is achieved using MPI's client/server methods, which require the execution of an intermediary server via the *ompi-server* command.
+- **Single World**: Designed for programs launched together in MPI's MPMD mode (using colon-separated commands) where all processes share the same `MPI_COMM_WORLD`.
+  
+- **Multi World**: For independently launched programs, each with their own `MPI_COMM_WORLD`, using MPI's client/server model with an `ompi-server` intermediary.
 
-<p>
-The abstractions are available in C, using the original MPI library, and in Python, through the <i>mpi4py</i> package. Both versions retain the functionality and capabilities of the <i>Single World</i> and <i>Multi World</i> abstractions, offering suitable alternatives for different needs and levels of expertise.
-</p>
+Available in both **C** (using native MPI) and **Python** (via mpi4py), these abstractions maintain identical functionality across languages while accommodating different developer preferences and use cases. <br/><br/>
 
 <h2 id="technologies">🛠️ Technologies</h2>
+Built with:
 
-- <h3 id="languages">Languages</h3>
+* [C](https://en.cppreference.com/w/c/language.html)
+  * [MPI (OpenMPI)](https://www.open-mpi.org/)
+* [Python](https://www.python.org/)
+  * [mpi4py](https://mpi4py.readthedocs.io/en/stable/) <br/><br/>
 
-    &nbsp;![Technologies](https://skillicons.dev/icons?i=c,python&theme=dark)
+<h2 id="getting-started">🚀 Getting Started</h2>
 
-- <h3 id="libraries">Libraries</h3>
+<h3 id="prerequisites">Prerequisites</h3>
 
-  - ![MPI (OpenMPI)](https://www.open-mpi.org/)
-  - ![mpi4py](https://mpi4py.readthedocs.io/en/stable/)
+- MPI implementation (OpenMPI recommended)
+- C compiler (GCC recommended)
+- Python and mpi4py
+- Git
 
-<h2 id="features">:gear: Features</h2>
+<h3 id="installation">Installation</h3>
+
+```bash
+# Clone the repository
+$ git clone https://github.com/RiadOliveira/MPMDManager.git
+
+# Navigate to project directory
+$ cd MPMDManager
+```
+
+<h3 id="structure">Project Structure</h3>
+The repository is organized as follows:
+
+```text
+src/
+├── single_world/
+│   ├── c/
+│   │   ├── abstraction/    # C implementation of Single World
+│   │   ├── example/        # Example usage in C
+│   │   └── run_example.sh  # Compiles and runs C example
+│   └── python/
+│       ├── abstraction/    # Python implementation
+│       ├── example/        # Python example
+│       └── run_example.sh  # Runs Python example
+└── multi_world/
+    ├── c/
+    │   ├── abstraction/    # C implementation of Multi World
+    │   ├── example/        # Client and server example
+    │   └── run_example.sh  # Compiles and runs examples
+    └── python/
+        ├── abstraction/    # Python implementation
+        ├── example/        # Python example
+        └── run_example.sh  # Runs Python examples
+```
+
+<h3 id="running-examples">Running Examples</h3>
+To execute any example, navigate to the corresponding implementation directory:
+
+```bash
+cd src/<abstraction>/<language>/
+./run_example.sh
+```
+
+Where:
+* ```<abstraction>``` is either ```single_world``` or ```multi_world```.
+* ```<language>``` is either ```c``` or ```python```.
+
+Each ```run_example.sh``` script handles all necessary setup including:
+* Automatic compilation (for C implementations).
+* MPI environment configuration.
+* Clean execution.
+* Proper cleanup of temporary files.
+
+<h2 id="features">⚙️ Features</h2>
 
 <h3 id="features-single">Single World</h3>
 
-- Local program information retrieval:
-  - Program Name
-  - Communicator
-  - Size
-- Local process information retrieval:
-  - Rank
-- Remote program information retrieval using its name or index:
-  - Communicator
-  - Size
+* Retrieve local program information (name, communicator, size).
+* Access process-specific details (rank).
+* Obtain remote program data by name or index (communicator, size).
+* Simplified inter-program communication setup.
 
 <h3 id="features-multi-client">Multi World (Client)</h3>
 
-- Request connection to a server using its name
-- Customize connection attempts by specifying:
-  - Max Attempts
-  - Initial Wait Time (in milliseconds)
-  - Wait Increment Time (in milliseconds, added to the wait time for each attempt)
-  - Max Wait Time (in milliseconds)
-- Retrieve communicators of previously connected servers by their names or indexes.
-- Disconnect from a specific server by its name or index.
-- Disconnect from all previously connected servers.
+* Connect to named servers with customizable retry logic by specifying:
+  * Max Attempts.
+  * Initial Wait Time (in milliseconds).
+  * Wait Increment Time (in milliseconds, added to the wait time for each attempt).
+  * Max Wait Time (in milliseconds).
+* Manage multiple server connections simultaneously.
+* Retrieve server communicators by name or index.
+* Disconnection from individual or all servers.
 
 <h3 id="features-multi-server">Multi World (Server)</h3>
 
-- Open and close the server.
-- Approve client connection, with the option to assign a name to the client.
-- Retrieve communicators of previously connected clients by their names or indexes.
-- Disconnect a specific client by its name or index.
-- Disconnect all previously connected clients.
-- Retrieve the local server name.
+* Server lifecycle management (open/close).
+* Client connection approval with optional naming.
+* Client communicator retrieval by name or index.
+* Selective or complete client disconnection.
+* Server naming and identification.
 
-<h2 id="reference">:blue_book: API Reference</h2>
+<br/>
 
-<p>
-This section provides a comprehensive overview of all functions offered by the abstractions, detailing their names, syntax, and descriptions. The documentation includes both <i>Single World</i> and <i>Multi World</i> abstractions, with the latter featuring a clear distinction between Client and Server functionalities. All functions are documented for both supported languages, C and Python, ensuring compatibility and clarity for developers across diverse platforms.
+<h2 id="reference">📚 API Reference</h2>
 
-In C, the functionalities are implemented as standalone functions with specific naming conventions for clarity. For <i>Single World</i>, all functions are prefixed with ```Manager_```. For <i>Multi World</i>, functions are categorized into Client and Server, using the prefixes ```Client_``` and ```Server_```, respectively.
+<h3 id="reference-notes">Notes</h3>
 
-In Python, the approach differs slightly by using distinct classes to encapsulate the functionality. The ```MPMDManager``` class represents the <i>Single World</i> abstraction, while the <i>Multi World</i> abstraction is divided into two separate classes: ```ClientManager``` and ```ServerManager```. Each class employs static methods defined with the ```@staticmethod``` decorator, allowing the functions to be called directly from the class without requiring object instantiation.
-</p>
+* All functions terminate with <code>MPI_Abort()</code> on failure.
+* Connection IDs can be names (strings) or indices (integers).
+* Python implementations use static methods for direct class access.
 
 <h3 id="reference-single">Single World</h3>
 
-- **Init**:
-  - Description: Initializes the manager by setting its communicator and connections. This routine performs communication among all processes, so it must be called by all of them at the start of their execution, immediately after ```MPI_Init()```.
-  - Syntax:
-    - C: ```const MPMDManager* Manager_Init(char** argv)```
-    - Python: ```MPMDManager.init() -> None```
-  - Note: In C, the function returns a pointer to the ```Manager```, which is required by other functions.
-- **Finalize**:
-  - Description: Finalizes the manager, freeing all allocated resources and terminating established connections.
-  - Syntax:
-    - C: ```void Manager_Finalize(const MPMDManager* manager)```
-    - Python: ```MPMDManager.finalize() -> None```
-- **Local Name**:
-  - Description: Returns the name of the local program.
-  - Syntax:
-    - C: ```const char* Manager_Local_name(const MPMDManager* manager)```
-    - Python: ```MPMDManager.local_name() -> str```
-- **Local Comm**:
-  - Description: Returns the communicator of the local program.
-  - Syntax:
-    - C: ```const MPI_Comm* Manager_Local_comm(const MPMDManager* manager)```
-    - Python: ```MPMDManager.local_comm() -> MPI.Intracomm```
-- **Local Rank**:
-  - Description: Returns the rank of the process within the context of the local program.
-  - Syntax:
-    - C: ```int Manager_Local_rank(const MPMDManager* manager)```
-    - Python: ```MPMDManager.local_rank() -> int```
-- **Local Size**:
-  - Description: Returns the size of the local program.
-  - Syntax:
-    - C: ```unsigned int Manager_Local_size(const MPMDManager* manager)```
-    - Python: ```MPMDManager.local_size() -> int```
-- **Comm To**:
-  - Description: Returns the communicator of a remote program identified by the provided ID, which can be its name or index.
-  - Syntax:
-    - C: ```const MPI_Comm* Manager_Comm_to(const MPMDManager* manager, ConnectionId id, IdType idType)```
-    - Python: ```MPMDManager.comm_to(identifier: str | int) -> MPI.Comm```
-  - Note: If the program with the specified ID is not found, an error message will be displayed, and the MPI environment will terminate using ```MPI_Abort()```.
-- **Size Of**:
-  - Description: Returns the size of a remote program identified by the provided ID, which can be its name or index.
-  - Syntax:
-    - C: ```unsigned int Manager_Size_of(const MPMDManager* manager, ConnectionId id, IdType idType)```
-    - Python: ```MPMDManager.size_of(identifier: str | int) -> int```
-  - Note: If the program with the specified ID is not found, an error message will be displayed, and the MPI environment will terminate using ```MPI_Abort()```.
+<table>
+  <thead>
+    <tr>
+      <th>Function</th>
+      <th>Description</th>
+      <th>C Syntax</th>
+      <th>Python Syntax</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Init</strong></td>
+      <td>Initializes manager with program arguments</td>
+      <td><code>const MPMDManager* Manager_Init(char** argv)</code></td>
+      <td><code>MPMDManager.init() -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Finalize</strong></td>
+      <td>Cleans up manager resources</td>
+      <td><code>void Manager_Finalize(const MPMDManager*)</code></td>
+      <td><code>MPMDManager.finalize() -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Local Name</strong></td>
+      <td>Gets local program name</td>
+      <td><code>const char* Manager_Local_name()</code></td>
+      <td><code>MPMDManager.local_name() -> str</code></td>
+    </tr>
+    <tr>
+      <td><strong>Local Comm</strong></td>
+      <td>Gets local communicator</td>
+      <td><code>const MPI_Comm* Manager_Local_comm()</code></td>
+      <td><code>MPMDManager.local_comm() -> MPI.Intracomm</code></td>
+    </tr>
+    <tr>
+      <td><strong>Local Rank</strong></td>
+      <td>Gets process rank</td>
+      <td><code>int Manager_Local_rank()</code></td>
+      <td><code>MPMDManager.local_rank() -> int</code></td>
+    </tr>
+    <tr>
+      <td><strong>Local Size</strong></td>
+      <td>Gets program size</td>
+      <td><code>unsigned int Manager_Local_size()</code></td>
+      <td><code>MPMDManager.local_size() -> int</code></td>
+    </tr>
+    <tr>
+      <td><strong>Comm To</strong></td>
+      <td>Gets remote communicator</td>
+      <td><code>const MPI_Comm* Manager_Comm_to(ConnectionId, IdType)</code></td>
+      <td><code>MPMDManager.comm_to(identifier: str | int) -> MPI.Comm</code></td>
+    </tr>
+    <tr>
+      <td><strong>Size Of</strong></td>
+      <td>Gets remote program size</td>
+      <td><code>unsigned int Manager_Size_of(ConnectionId, IdType)</code></td>
+      <td><code>MPMDManager.size_of(identifier: str | int) -> int</code></td>
+    </tr>
+  </tbody>
+</table>
 
 <h3 id="reference-multi-client">Multi World (Client)</h3>
 
-- **Init**:
-  - Description: Initializes the manager by setting its communicator and variables. This routine should only be called by processes that specifically intend to act as clients to servers, not by all processes in the program.
-  - Syntax:
-    - C: ```const ClientManager* Client_Init(uint maxServers)```
-    - Python: ```ClientManager.init() -> None```
-  - Note: In C, the function returns a pointer to the ```ClientManager```, which is required by other functions. Additionally, the maximum number of servers that can connect must be specified.
-- **Finalize**:
-  - Description: Finalizes the manager, freeing all allocated resources and terminating established connections.
-  - Syntax:
-    - C: ```void Client_Finalize(const ClientManager* manager)```
-    - Python: ```ClientManager.finalize() -> None```
-- **Connect**:
-  - Description: Attempts to establish a connection with an open server that has the specified name. If successful, it returns the server's ```Intercommunicator```. Otherwise, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```. If the connection attempt fails, it retries after a delay, based on the attributes of the provided ConnectAttemptData structure/object, which includes: maxAttempts, initialWaitMs, waitIncrementMs e maxWaitMs. Default values are 10 maximum attempts, 500 ms initial wait, 500 ms increment per attempt, and 5000 ms maximum wait.
-  - Syntax:
-    - C: ```const MPI_Comm* Client_Connect(const ClientManager* manager, const char* serverName, const ConnectAttemptData* attemptData)```
-    - Python: ```ClientManager.connect(server_name: str, attemptData = ConnectAttemptData()) -> MPI.Intercomm```
-- **Retrieve Server Comm**:
-  - Description: Returns the communicator of a server identified by the provided ID, which can be its name or index.
-  - Syntax:
-    - C: ```const MPI_Comm* Client_Retrieve_Server_comm(const ClientManager* manager, ConnectionId id, IdType idType)```
-    - Python: ```ClientManager.retrieve_server_comm(server_id: str | int) -> MPI.Intercomm```
-    - Note: If the server with the specified ID is not found, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```.
-- **Disconnect Server**:
-  - Description: Disconnects and cleans up resources for the server identified by the provided ID, which can be its name or index.
-  - Syntax:
-    - C: ```void Client_Disconnect_server(const ClientManager* manager, ConnectionId id, IdType idType)```
-    - Python: ```ClientManager.disconnect_server(server_id: str | int) -> None```
-    - Note: If the server with the specified ID is not found, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```.
-- **Disconnect Servers**:
-  - Description: Disconnects and cleans up resources for all previously connected servers.
-  - Syntax:
-    - C: ```void Client_Disconnect_servers(const ClientManager* manager)```
-    - Python: ```ClientManager.disconnect_servers() -> None```
+<table>
+  <thead>
+    <tr>
+      <th>Function</th>
+      <th>Description</th>
+      <th>C Syntax</th>
+      <th>Python Syntax</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Init</strong></td>
+      <td>Initializes client manager</td>
+      <td><code>const ClientManager* Client_Init(uint maxServers)</code></td>
+      <td><code>ClientManager.init() -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Finalize</strong></td>
+      <td>Cleans up client resources</td>
+      <td><code>void Client_Finalize(const ClientManager*)</code></td>
+      <td><code>ClientManager.finalize() -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Connect</strong></td>
+      <td>Connects to named server with retry logic</td>
+      <td><code>const MPI_Comm* Client_Connect(const char*, const ConnectAttemptData*)</code></td>
+      <td><code>ClientManager.connect(server_name: str, attemptData=ConnectAttemptData()) -> MPI.Intercomm</code></td>
+    </tr>
+    <tr>
+      <td><strong>Retrieve Server Comm</strong></td>
+      <td>Gets server communicator</td>
+      <td><code>const MPI_Comm* Client_Retrieve_Server_comm(ConnectionId, IdType)</code></td>
+      <td><code>ClientManager.retrieve_server_comm(server_id: str | int) -> MPI.Intercomm</code></td>
+    </tr>
+    <tr>
+      <td><strong>Disconnect Server</strong></td>
+      <td>Disconnects from specific server</td>
+      <td><code>void Client_Disconnect_server(ConnectionId, IdType)</code></td>
+      <td><code>ClientManager.disconnect_server(server_id: str | int) -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Disconnect Servers</strong></td>
+      <td>Disconnects from all servers</td>
+      <td><code>void Client_Disconnect_servers()</code></td>
+      <td><code>ClientManager.disconnect_servers() -> None</code></td>
+    </tr>
+  </tbody>
+</table>
 
 <h3 id="reference-multi-server">Multi World (Server)</h3>
 
-- **Init**:
-  - Description: Initializes the manager by setting its communicator and variables. If the server name is null, it will be automatically generated using the file name combined with the rank of the process that called the method, in that order. This routine should only be called by processes intending to act as servers and connect with clients, not by all processes in the program.
-  - Syntax:
-    - C: ```const ServerManager* Server_Init(char** argv, const char* serverName, uint maxClients)```
-    - Python: ```ServerManager.init(server_name: str | None = None) -> None```
-  - Note: In C, the function returns a pointer to the ```ServerManager```, which is required by other functions. Additionally, the maximum number of clients that can connect must be specified.
-- **Finalize**:
-  - Description: Finalizes the manager, freeing all allocated resources and terminating established connections.
-  - Syntax:
-    - C: ```void Server_Finalize(const ServerManager* manager)```
-    - Python: ```ServerManager.finalize() -> None```
-- **Local Name**:
-  - Description: Returns the name of the local server.
-  - Syntax:
-    - C: ```const char* Server_Local_name(const ServerManager* manager)```
-    - Python: ```ServerManager.local_name() -> str```
-- **Open**:
-  - Description: Opens the server for client connection requests by calling ```MPI_Open_port()``` and ```MPI_Publish_name()``` with the name provided during initialization.
-  - Syntax:
-    - C: ```void Server_Open(const ServerManager* manager)```
-    - Python: ```ServerManager.open() -> None```
-- **Close**:
-  - Description: Closes the server by calling ```MPI_Unpublish_name()``` and ```MPI_Close_port()```. This routine is also called during the **Finalize** operation.
-  - Syntax:
-    - C: ```void Server_Close(const ServerManager* manager)```
-    - Python: ```ServerManager.finalize() -> None```
-- **Accept**:
-  - Description: Waits for a client connection request and establishes a connection, returning the corresponding ```Intercommunicator```. Optionally, a name can be assigned to the connected client, which can be used as its identifier in other functions.
-  - Syntax:
-    - C: ```const MPI_Comm* Server_Accept(const ServerManager* manager, const char* clientName)```
-    - Python: ```ServerManager.accept(client_id: str | None = None) -> Intercomm```
-- **Retrieve Client Comm**:
-  - Description: Returns the communicator of a client identified by the provided ID, which can be its name or index.
-  - Syntax:
-    - C: ```const MPI_Comm* Server_Retrieve_Client_comm(const ServerManager* manager, ConnectionId id, IdType idType)```
-    - Python: ```ServerManager.retrieve_client_comm(client_id: str | int) -> MPI.Intercomm```
-    - Note: If the client with the specified ID is not found, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```.
-- **Disconnect Client**:
-  - Description: Disconnects and cleans up resources for the client identified by the provided ID, which can be its name or index.
-  - Syntax:
-    - C: ```void Server_Disconnect_client(const ServerManager* manager, ConnectionId id, IdType idType)```
-    - Python: ```ServerManager.disconnect_client(client_id: str | int) -> None```
-    - Note: If the client with the specified ID is not found, an error message is displayed, and the MPI environment terminates using ```MPI_Abort()```.
-- **Disconnect Clients**:
-  - Description: Disconnects and cleans up resources for all previously connected clients.
-  - Syntax:
-    - C: ```void Server_Disconnect_clients(const ServerManager* manager)```
-    - Python: ```ServerManager.disconnect_clients() -> None```
+<table>
+  <thead>
+    <tr>
+      <th>Function</th>
+      <th>Description</th>
+      <th>C Syntax</th>
+      <th>Python Syntax</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Init</strong></td>
+      <td>Initializes server manager</td>
+      <td><code>const ServerManager* Server_Init(char**, const char*, uint)</code></td>
+      <td><code>ServerManager.init(server_name: str | None = None) -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Finalize</strong></td>
+      <td>Cleans up server resources</td>
+      <td><code>void Server_Finalize(const ServerManager*)</code></td>
+      <td><code>ServerManager.finalize() -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Local Name</strong></td>
+      <td>Gets server name</td>
+      <td><code>const char* Server_Local_name()</code></td>
+      <td><code>ServerManager.local_name() -> str</code></td>
+    </tr>
+    <tr>
+      <td><strong>Open</strong></td>
+      <td>Opens server for connections</td>
+      <td><code>void Server_Open()</code></td>
+      <td><code>ServerManager.open() -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Close</strong></td>
+      <td>Closes server</td>
+      <td><code>void Server_Close()</code></td>
+      <td><code>ServerManager.close() -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Accept</strong></td>
+      <td>Accepts client connection</td>
+      <td><code>const MPI_Comm* Server_Accept(const char*)</code></td>
+      <td><code>ServerManager.accept(client_id: str | None = None) -> Intercomm</code></td>
+    </tr>
+    <tr>
+      <td><strong>Retrieve Client Comm</strong></td>
+      <td>Gets client communicator</td>
+      <td><code>const MPI_Comm* Server_Retrieve_Client_comm(ConnectionId, IdType)</code></td>
+      <td><code>ServerManager.retrieve_client_comm(client_id: str | int) -> MPI.Intercomm</code></td>
+    </tr>
+    <tr>
+      <td><strong>Disconnect Client</strong></td>
+      <td>Disconnects specific client</td>
+      <td><code>void Server_Disconnect_client(ConnectionId, IdType)</code></td>
+      <td><code>ServerManager.disconnect_client(client_id: str | int) -> None</code></td>
+    </tr>
+    <tr>
+      <td><strong>Disconnect Clients</strong></td>
+      <td>Disconnects all clients</td>
+      <td><code>void Server_Disconnect_clients()</code></td>
+      <td><code>ServerManager.disconnect_clients() -> None</code></td>
+    </tr>
+  </tbody>
+</table>
 
-<h2 id="license">:memo: License</h2>
+<h2 id="certification">📜 Certification</h2>
+
+This software is officially registered with the **Brazilian National Institute of Industrial Property (INPI)** as a Computer Program:
+
+- **Certificate Type**: Certificate of Registration of a Computer Program
+- **Registration Number**: BR512025000477-0
+- **Issuance Date**: February 2025
+- **Expiration Date**: January 2076
+- **Certificate URL**: [MPMDManager Certificate](https://drive.google.com/file/d/1yp7-32CHxvs7p2AMxBkyF8EtoYUkXeRQ/view?usp=sharing)
+- **Issuing Authority**: [INPI Brazil](https://www.gov.br/inpi/en)
+
+<h2 id="license">📝 License</h2>
 This project is MIT Licensed. See <a href="https://github.com/RiadOliveira/MPMDManager/blob/main/LICENSE">LICENSE</a> file for more details.
 
 <h2 id="authors">👨‍💻 Authors</h2>
 
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/RiadOliveira">
-        <img src="https://avatars.githubusercontent.com/u/69125013?v=4" width="100px;" alt="Ríad Oliveira"/>
-        <br/><sub><b>Ríad Oliveira</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/paulohenriquels">
-        <img src="https://avatars.githubusercontent.com/u/102553073?v=4" width="100px;" alt="Paulo Henrique"/>
-        <br/><sub><b>Paulo Henrique</b></sub>
-      </a>
-    </td>
-  </tr>
-</table>
+<kbd>
+ <a href="https://github.com/RiadOliveira">
+   <img src="https://avatars.githubusercontent.com/u/69125013?v=4" width="100" alt="Ríad Oliveira"/>
+   <br/><br/>
+   <p align="center"><b>Ríad Oliveira</b></p>
+ </a>
+</kbd>
+<kbd>
+ <a href="https://github.com/paulohenriquels">
+   <img src="https://avatars.githubusercontent.com/u/102553073?v=4" width="100" alt="Paulo Henrique"/>
+   <br/><br/>
+   <p align="center"><b>Paulo Henrique</b></p>
+ </a>
+</kbd>
