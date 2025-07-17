@@ -1,0 +1,29 @@
+{
+  "title": "MPMDManager",
+  "extendedDescription": "An abstraction layer built on top of MPI that simplifies development of parallel programs in MPMD (Multiple Program Multiple Data) environments by providing intuitive functions for program identification, communication, and coordination.",
+  "imageId": "e7255479-e9a6-4478-ba8f-ad05f6373820",
+  "highlightColor": "red",
+  "attachmentsUrl": true,
+  "technologies": [
+    "C",
+    "Python",
+    "C++"
+  ],
+  "features": [
+    {
+      "name": "MPI Abstraction",
+      "description": "Complete lifecycle management for parallel programs with MPI abstraction layers.",
+      "icon": "codeBranch"
+    },
+    {
+      "name": "Smart Connections",
+      "description": "Reliable communication with configurable retry and error resilience.",
+      "icon": "projectDiagram"
+    },
+    {
+      "name": "Language Parity",
+      "description": "Identical C/Python APIs with seamless cross-language compatibility.",
+      "icon": "syncAlt"
+    }
+  ]
+}
