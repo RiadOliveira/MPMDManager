@@ -4,7 +4,8 @@
   An abstraction layer built on top of MPI that simplifies development of parallel programs in MPMD (Multiple Program Multiple Data) environments by providing intuitive functions for program identification, communication, and coordination.
 </p>
 
-![image](https://img.shields.io/github/license/RiadOliveira/MPMDManager)
+![Preview](https://github.com/user-attachments/assets/e7255479-e9a6-4478-ba8f-ad05f6373820)
+![License](https://img.shields.io/github/license/RiadOliveira/MPMDManager)
 
 Contents
 =================
