@@ -7,6 +7,8 @@
 ![Preview](https://github.com/user-attachments/assets/e7255479-e9a6-4478-ba8f-ad05f6373820)
 ![License](https://img.shields.io/github/license/RiadOliveira/MPMDManager)
 
+<br/>
+
 Contents
 =================
 <!--ts-->
@@ -108,7 +110,7 @@ Each ```run_example.sh``` script handles all necessary setup including:
 * Automatic compilation (for C implementations).
 * MPI environment configuration.
 * Clean execution.
-* Proper cleanup of temporary files.
+* Proper cleanup of temporary files. <br/><br/>
 
 <h2 id="features">⚙️ Features</h2>
 
@@ -136,9 +138,7 @@ Each ```run_example.sh``` script handles all necessary setup including:
 * Client connection approval with optional naming.
 * Client communicator retrieval by name or index.
 * Selective or complete client disconnection.
-* Server naming and identification.
-
-<br/>
+* Server naming and identification. <br/><br/>
 
 <h2 id="reference">📚 API Reference</h2>
 
